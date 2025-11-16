@@ -4,8 +4,11 @@ WORKDIR /app
 ENV GOTOOLCHAIN=auto
 RUN apk add --no-cache git ca-certificates build-base
 COPY go.mod go.sum ./
+# Fix go version to 1.22 if needed (some go commands auto-upgrade it)
+RUN sed -i 's/^go 1\.24\..*/go 1.22/' go.mod || true
 RUN go mod download
 COPY . .
+RUN sed -i 's/^go 1\.24\..*/go 1.22/' go.mod || true
 RUN go mod tidy
 
 # Builder for production binary

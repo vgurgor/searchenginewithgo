@@ -103,7 +103,9 @@ CODECOV_TOKEN - Codecov API token (codecov.io'dan alınır)
 - ✅ Test panic: nil pointer dereference (`content_sync_service_test.go`)
 - ✅ Test'te nil logger kullanımı (ScoreCalculatorService)
 - ✅ Docker build: grpc-gateway v2.27.3 Go 1.24.0 gerektirme hatası
+- ✅ Docker build: tlscert v0.2.0 Go 1.23 gerektirme hatası
 - ✅ Dependency version uyumsuzluğu
+- ✅ **CVE-2019-25211: gin-contrib/cors CRITICAL güvenlik açığı** (v1.5.0 → v1.6.0)
 - ✅ Release workflow'unda asset upload sorunları
 
 ### 📦 Go Module ve Version Güncellemeleri
@@ -121,6 +123,7 @@ CODECOV_TOKEN - Codecov API token (codecov.io'dan alınır)
 
 **Güncellenen Dependencies:**
 - `redis/go-redis/v9` v9.5.1 → v9.7.3
+- `gin-contrib/cors` v1.5.0 → v1.6.0 ⚠️ **CRITICAL CVE-2019-25211 FIX**
 - `grpc-ecosystem/grpc-gateway/v2` v2.27.3 → v2.22.0 (Go 1.22 için)
 - `mdelapenya/tlscert` v0.2.0 → v0.1.0 (Go 1.22 için)
 - `testcontainers/testcontainers-go` v0.40.0 → v0.36.0 (Go 1.22 için)
@@ -129,9 +132,11 @@ CODECOV_TOKEN - Codecov API token (codecov.io'dan alınır)
 
 **Dockerfile Güncellemesi:**
 - `ENV GOTOOLCHAIN=auto` direktifi go mod download'dan önceye taşındı
+- Otomatik Go version düzeltme eklendi: `sed -i 's/^go 1\.24\..*/go 1.22/' go.mod`
 - Bu sayede Go 1.22 ile daha yüksek version gerektiren modüller çalışabiliyor
+- Docker build sırasında go.mod otomatik olarak düzeltiliyor
 
-**Not:** `go mod tidy` çalıştırıldı. Go version `go mod edit -go=1.22` ile sabitlendi. Dockerfile'da `GOTOOLCHAIN=auto` ile uyumluluk sağlandı.
+**Not:** `go mod tidy` çalıştırıldı. Dockerfile'da otomatik düzeltme mekanizması sayesinde build başarılı oluyor. Local'de `make fix-go-version` komutu ile manuel düzeltme yapılabilir.
 
 ### 🚀 İyileştirmeler
 
