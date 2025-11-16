@@ -196,14 +196,33 @@ export function ContentDetail({ content, onBack }: ContentDetailProps) {
           </div>
 
           {/* Thumbnail/Image Section */}
-          {detail.contentType === 'video' && detail.thumbnail && (
+          {detail.contentType === 'video' && (
             <div className="relative h-96 overflow-hidden">
-              <img
-                src={detail.thumbnail}
-                alt={detail.title}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div>
+              {detail.thumbnail ? (
+                <>
+                  <img
+                    src={detail.thumbnail}
+                    alt={detail.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const parent = target.parentElement;
+                      if (parent) {
+                        parent.classList.add('bg-gradient-to-br', 'from-gray-800', 'to-gray-900', 'flex', 'items-center', 'justify-center');
+                        const icon = document.createElement('div');
+                        icon.innerHTML = '<svg class="w-32 h-32 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+                        parent.insertBefore(icon, target);
+                      }
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div>
+                </>
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
+                  <Video className="w-32 h-32 text-gray-700" />
+                </div>
+              )}
             </div>
           )}
 

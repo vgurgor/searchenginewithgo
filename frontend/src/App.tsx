@@ -20,6 +20,7 @@ function App() {
   const [sortBy, setSortBy] = useState<SortOption>('score-high');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedContent, setSelectedContent] = useState<SearchResult | null>(null);
+  const [hasSearched, setHasSearched] = useState(false); // Arama yapıldı mı kontrolü
   const resultsPerPage = 9;
   const [results, setResults] = useState<SearchResult[]>([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -49,38 +50,59 @@ function App() {
     const sort = params.get('sort');
     const page = params.get('page');
 
-    if (q) setSearchQuery(q);
-    if (type === 'video' || type === 'text') setContentType(type as ContentType);
-    if (sort && apiToSortMap[sort]) setSortBy(apiToSortMap[sort]);
+    // URL'de parametre varsa state'leri doldur ve aramayı aktif et
+    let hasUrlParams = false;
+    
+    if (q) {
+      setSearchQuery(q);
+      hasUrlParams = true;
+    }
+    if (type === 'video' || type === 'text') {
+      setContentType(type as ContentType);
+      hasUrlParams = true;
+    }
+    if (sort && (sort in apiToSortMap)) {
+      setSortBy(apiToSortMap[sort as keyof typeof apiToSortMap]);
+    }
     if (page) {
       const p = parseInt(page, 10);
       if (!Number.isNaN(p) && p > 0) setCurrentPage(p);
     }
+    
+    // URL'de arama parametresi varsa arama yapılmış sayalım
+    if (hasUrlParams) {
+      setHasSearched(true);
+    }
   }, []);
 
   useEffect(() => {
+    // Sadece arama yapılmışsa API'ye istek at
+    if (!hasSearched) return;
+    
     const typeParam = contentType === 'all' ? undefined : contentType;
     const filters: ApiSearchFilters = {
       q: searchQuery || undefined,
-      type: typeParam as any,
-      sort: sortToApiMap[sortBy],
+      type: typeParam as 'video' | 'text' | undefined,
+      sort: sortToApiMap[sortBy as keyof typeof sortToApiMap],
       page: currentPage,
       page_size: resultsPerPage,
     };
     searchContents(filters);
-  }, [searchQuery, contentType, sortBy, currentPage]);
+  }, [searchQuery, contentType, sortBy, currentPage, hasSearched]);
 
-  // Arama parametreleri değiştikçe URL'i güncelle
+  // Arama parametreleri değiştikçe URL'i güncelle (sadece arama yapılmışsa)
   useEffect(() => {
+    if (!hasSearched) return;
+    
     const params = new URLSearchParams();
     if (searchQuery) params.set('q', searchQuery);
     if (contentType !== 'all') params.set('type', contentType);
-    params.set('sort', sortToApiMap[sortBy]);
+    params.set('sort', sortToApiMap[sortBy as keyof typeof sortToApiMap]);
     params.set('page', String(currentPage));
     params.set('page_size', String(resultsPerPage));
     const newUrl = `${window.location.pathname}?${params.toString()}`;
     window.history.replaceState(null, '', newUrl);
-  }, [searchQuery, contentType, sortBy, currentPage]);
+  }, [searchQuery, contentType, sortBy, currentPage, hasSearched]);
 
   useEffect(() => {
     const mapped: SearchResult[] = (contents || []).map((item: ApiContent) => ({
@@ -99,10 +121,13 @@ function App() {
   }, [contents, pagination]);
 
   useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, contentType, sortBy]);
+    if (hasSearched) {
+      setCurrentPage(1);
+    }
+  }, [searchQuery, contentType, sortBy, hasSearched]);
 
   const handleSearch = () => {
+    setHasSearched(true); // Arama yapıldığını işaretle
     setCurrentPage(1);
   };
 
@@ -182,17 +207,51 @@ function App() {
             <FilterBar
               contentType={contentType}
               sortBy={sortBy}
-              onContentTypeChange={setContentType}
-              onSortChange={setSortBy}
+              onContentTypeChange={(type) => {
+                setContentType(type);
+                setHasSearched(true); // Filtre değiştiğinde arama yap
+              }}
+              onSortChange={(sort) => {
+                setSortBy(sort);
+                setHasSearched(true); // Sıralama değiştiğinde arama yap
+              }}
             />
 
-            {loading ? (
+            {!hasSearched ? (
+              <div className="text-center py-32">
+                <div className="inline-block p-12 bg-gray-900/50 backdrop-blur-sm border border-gray-800 rounded-2xl space-y-6">
+                  <div className="flex justify-center">
+                    <div className="p-6 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 rounded-full">
+                      <Sparkles className="w-16 h-16 text-emerald-400" />
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <h2 className="text-3xl font-bold text-gray-100">Aramaya Başlayın</h2>
+                    <p className="text-gray-400 text-lg max-w-md">
+                      Arama çubuğunu kullanarak içerikleri keşfedin veya filtreleri kullanarak sonuçları özelleştirin
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap justify-center gap-2 pt-4">
+                    <span className="px-3 py-1.5 bg-gray-800/50 border border-gray-700 rounded-lg text-sm text-gray-400">
+                      🎥 7 Video
+                    </span>
+                    <span className="px-3 py-1.5 bg-gray-800/50 border border-gray-700 rounded-lg text-sm text-gray-400">
+                      📄 1 Metin
+                    </span>
+                    <span className="px-3 py-1.5 bg-gray-800/50 border border-gray-700 rounded-lg text-sm text-gray-400">
+                      ⭐ Sıralama
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ) : loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {Array.from({ length: 9 }, (_, i) => (
-                  <SkeletonCard
-                    key={i}
-                    type={i % 2 === 0 ? 'video' : 'text'}
-                  />
+                  <div key={i}>
+                    <SkeletonCard
+                      type={i % 2 === 0 ? 'video' : 'text'}
+                    />
+                  </div>
                 ))}
               </div>
             ) : error ? (
@@ -211,7 +270,7 @@ function App() {
             ) : (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {results.map((result) => (
+                  {results.map((result: SearchResult) => (
                     <ResultCard key={result.id} result={result} onClick={() => handleContentClick(result)} />
                   ))}
                 </div>

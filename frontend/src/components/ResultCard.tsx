@@ -30,13 +30,30 @@ export function ResultCard({ result, onClick }: ResultCardProps) {
     >
       <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 to-teal-500/0 group-hover:from-emerald-500/5 group-hover:to-teal-500/5 transition-all duration-300"></div>
 
-      {result.contentType === 'video' && result.thumbnail && (
+      {result.contentType === 'video' && (
         <div className="relative h-48 overflow-hidden">
-          <img
-            src={result.thumbnail}
-            alt={result.title}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-          />
+          {result.thumbnail ? (
+            <img
+              src={result.thumbnail}
+              alt={result.title}
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                const parent = target.parentElement;
+                if (parent) {
+                  parent.classList.add('bg-gradient-to-br', 'from-gray-800', 'to-gray-900', 'flex', 'items-center', 'justify-center');
+                  const icon = document.createElement('div');
+                  icon.innerHTML = '<svg class="w-16 h-16 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+                  parent.insertBefore(icon, target);
+                }
+              }}
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
+              <Video className="w-16 h-16 text-gray-700" />
+            </div>
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div>
           <div className="absolute top-3 right-3 px-3 py-1.5 bg-emerald-500/90 backdrop-blur-sm rounded-lg flex items-center gap-1.5">
             <Video className="w-3.5 h-3.5 text-gray-950" />

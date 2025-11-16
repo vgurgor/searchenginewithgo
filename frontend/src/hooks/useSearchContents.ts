@@ -46,9 +46,10 @@ export const useSearchContents = (
     searchContents(currentFilters);
   }, [currentFilters, searchContents]);
 
-  useEffect(() => {
-    searchContents(initialFilters);
-  }, []);
+  // İlk yüklemede otomatik arama yapma - App.tsx kontrol eder
+  // useEffect(() => {
+  //   searchContents(initialFilters);
+  // }, []);
 
   return {
     contents,
