@@ -1,0 +1,31 @@
+# Code Owners - Otomatik reviewer atama
+
+# Global owners
+* @volkan
+
+# Backend ownership
+/backend/ @volkan
+/backend/**/*.go @volkan
+
+# Frontend ownership
+/frontend/ @volkan
+/frontend/**/*.ts @volkan
+/frontend/**/*.tsx @volkan
+
+# Infrastructure
+/backend/deployment/ @volkan
+/backend/docker-compose*.yml @volkan
+/backend/Dockerfile @volkan
+/frontend/Dockerfile @volkan
+
+# Database
+/backend/scripts/migrations/ @volkan
+
+# CI/CD
+/.github/ @volkan
+/.github/workflows/ @volkan
+
+# Documentation
+*.md @volkan
+/docs/ @volkan
+

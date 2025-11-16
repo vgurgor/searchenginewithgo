@@ -194,7 +194,15 @@ docker compose -f backend/docker-compose.production.yml up -d
   - `ADMIN_API_KEY` zorunlu
   - Nginx üzerinden SSL/TLS reverse proxy önerilir (`backend/deployment/nginx.conf`)
 - CI/CD:
-  - Test, lint ve image publish adımları tipik olarak GitHub Actions ile tanımlanabilir.
+  - **GitHub Actions**: Otomatik test, lint, build ve deployment pipeline'ları
+  - **Workflows**: `.github/workflows/` klasöründe tanımlı 5 workflow
+    - `ci.yml` - Otomatik test ve build
+    - `deploy.yml` - Production deployment
+    - `pr-check.yml` - Pull request otomasyonu
+    - `release.yml` - Version release yönetimi
+    - `scheduled-tasks.yml` - Günlük maintenance işleri
+  - **Dependabot**: Otomatik dependency güncellemeleri
+  - Detaylı bilgi: `.github/workflows/README.md`
 
 ---
 

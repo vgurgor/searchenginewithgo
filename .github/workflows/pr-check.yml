@@ -1,0 +1,129 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  pr-info:
+    name: PR Information
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Check PR title
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          if ! echo "$PR_TITLE" | grep -qE '^(feat|fix|docs|style|refactor|perf|test|chore|ci)(\(.+\))?: .+'; then
+            echo "❌ PR title must follow conventional commits format"
+            echo "Examples:"
+            echo "  feat: add new search filter"
+            echo "  fix(backend): resolve database connection issue"
+            echo "  docs: update README with deployment instructions"
+            exit 1
+          fi
+          echo "✅ PR title follows conventional commits format"
+      
+      - name: Check branch name
+        run: |
+          BRANCH_NAME="${{ github.head_ref }}"
+          if ! echo "$BRANCH_NAME" | grep -qE '^(feature|bugfix|hotfix|release)/.+'; then
+            echo "⚠️ Warning: Branch name should follow pattern: feature/*, bugfix/*, hotfix/*, or release/*"
+          else
+            echo "✅ Branch name follows naming convention"
+          fi
+      
+      - name: Calculate changed lines
+        run: |
+          git diff --shortstat origin/${{ github.base_ref }}..HEAD || true
+      
+      - name: Check file changes
+        run: |
+          echo "### Changed Files" >> $GITHUB_STEP_SUMMARY
+          git diff --name-status origin/${{ github.base_ref }}..HEAD | while read status file; do
+            echo "- [$status] $file" >> $GITHUB_STEP_SUMMARY
+          done
+
+  code-quality:
+    name: Code Quality Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Check for TODO/FIXME comments
+        run: |
+          echo "### TODO/FIXME Comments Found" >> $GITHUB_STEP_SUMMARY
+          grep -r "TODO\|FIXME" --include="*.go" --include="*.ts" --include="*.tsx" . | head -20 >> $GITHUB_STEP_SUMMARY || echo "No TODO/FIXME comments found" >> $GITHUB_STEP_SUMMARY
+      
+      - name: Check for large files
+        run: |
+          echo "### Large Files Check" >> $GITHUB_STEP_SUMMARY
+          find . -type f -size +1M -not -path "*/node_modules/*" -not -path "*/.git/*" | while read file; do
+            size=$(du -h "$file" | cut -f1)
+            echo "⚠️ Large file: $file ($size)" >> $GITHUB_STEP_SUMMARY
+          done || echo "✅ No large files found" >> $GITHUB_STEP_SUMMARY
+      
+      - name: Check for hardcoded secrets
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.base_ref }}
+          head: HEAD
+
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v3
+        with:
+          fail-on-severity: moderate
+
+  auto-label:
+    name: Auto Label PR
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Label PR based on files
+        uses: actions/labeler@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+  size-label:
+    name: Label PR Size
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    
+    steps:
+      - name: Add size label
+        uses: codelytv/pr-size-labeler@v1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          xs_label: 'size/xs'
+          xs_max_size: 10
+          s_label: 'size/s'
+          s_max_size: 100
+          m_label: 'size/m'
+          m_max_size: 500
+          l_label: 'size/l'
+          l_max_size: 1000
+          xl_label: 'size/xl'
+

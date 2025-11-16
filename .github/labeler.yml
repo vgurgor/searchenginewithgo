@@ -1,0 +1,43 @@
+# Auto-labeler configuration for PRs
+
+backend:
+  - backend/**/*
+  - backend/*
+
+frontend:
+  - frontend/**/*
+  - frontend/*
+
+documentation:
+  - '**/*.md'
+  - docs/**/*
+
+dependencies:
+  - '**/package.json'
+  - '**/package-lock.json'
+  - '**/go.mod'
+  - '**/go.sum'
+
+docker:
+  - '**/Dockerfile'
+  - '**/docker-compose*.yml'
+
+ci/cd:
+  - .github/**/*
+
+database:
+  - '**/migrations/**/*
+  - '**/*_repository.go'
+
+tests:
+  - '**/*_test.go'
+  - '**/tests/**/*'
+  - '**/*.test.ts'
+  - '**/*.test.tsx'
+
+configuration:
+  - '**/*.config.js'
+  - '**/*.config.ts'
+  - '**/tsconfig*.json'
+  - '**/.env*'
+

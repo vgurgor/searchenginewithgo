@@ -1,0 +1,130 @@
+name: Scheduled Tasks
+
+on:
+  schedule:
+    # Her gün saat 02:00'de çalışır (UTC)
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  dependency-update:
+    name: Check for Dependency Updates
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+      
+      - name: Check Go dependencies
+        working-directory: ./backend
+        run: |
+          echo "### Go Dependencies Status" >> $GITHUB_STEP_SUMMARY
+          go list -u -m all | grep '\[' >> $GITHUB_STEP_SUMMARY || echo "All Go dependencies up to date" >> $GITHUB_STEP_SUMMARY
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Check npm dependencies
+        working-directory: ./frontend
+        run: |
+          npm install -g npm-check-updates
+          echo "### NPM Dependencies Status" >> $GITHUB_STEP_SUMMARY
+          ncu >> $GITHUB_STEP_SUMMARY || echo "All npm dependencies up to date" >> $GITHUB_STEP_SUMMARY
+
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'table'
+      
+      - name: Go security check
+        working-directory: ./backend
+        run: |
+          go install github.com/securego/gosec/v2/cmd/gosec@latest
+          gosec ./... || true
+      
+      - name: NPM audit
+        working-directory: ./frontend
+        run: npm audit --audit-level=moderate || true
+
+  docker-image-cleanup:
+    name: Clean Old Docker Images
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    
+    steps:
+      - name: Delete old container images
+        uses: snok/container-retention-policy@v2
+        with:
+          image-names: search-engine-backend,search-engine-frontend
+          cut-off: 30 days ago UTC
+          account-type: org
+          keep-at-least: 5
+          untagged-only: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  test-coverage-report:
+    name: Generate Coverage Report
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+      
+      - name: Generate coverage report
+        working-directory: ./backend
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USER: testuser
+          DB_PASSWORD: testpass
+          DB_NAME: testdb
+          REDIS_ADDR: localhost:6379
+        run: |
+          go test -v -coverprofile=coverage.out -covermode=atomic ./...
+          go tool cover -html=coverage.out -o coverage.html
+      
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: backend/coverage.html
+          retention-days: 30
+
