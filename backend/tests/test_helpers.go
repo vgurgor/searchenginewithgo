@@ -186,6 +186,39 @@ func runMigrations(ctx context.Context, connStr string) error {
 		CREATE INDEX IF NOT EXISTS idx_contents_lower_description ON contents((LOWER(description)));
 		CREATE INDEX IF NOT EXISTS idx_contents_published_at ON contents(published_at DESC);
 		CREATE INDEX IF NOT EXISTS idx_content_metrics_final_score_desc ON content_metrics(final_score DESC);`,
+		`CREATE INDEX IF NOT EXISTS idx_contents_fts ON contents USING GIN (to_tsvector('english', title || ' ' || COALESCE(description, '')));`,
+		`CREATE OR REPLACE FUNCTION content_search_relevance(
+			search_query TEXT,
+			title TEXT,
+			description TEXT
+		) RETURNS REAL AS $$
+		DECLARE
+			title_weight REAL := 1.0;
+			desc_weight REAL := 0.4;
+			title_score REAL;
+			desc_score REAL;
+		BEGIN
+			title_score := ts_rank(to_tsvector('english', title), plainto_tsquery('english', search_query)) * title_weight;
+			desc_score := ts_rank(to_tsvector('english', COALESCE(description, '')), plainto_tsquery('english', search_query)) * desc_weight;
+			RETURN title_score + desc_score;
+		END;
+		$$ LANGUAGE plpgsql IMMUTABLE;`,
+		`CREATE OR REPLACE FUNCTION fuzzy_search_relevance(
+			search_term TEXT,
+			title TEXT,
+			description TEXT
+		) RETURNS REAL AS $$
+		DECLARE
+			title_similarity REAL;
+			desc_similarity REAL;
+			title_weight REAL := 0.7;
+			desc_weight REAL := 0.3;
+		BEGIN
+			title_similarity := similarity(search_term, title) * title_weight;
+			desc_similarity := similarity(search_term, COALESCE(description, '')) * desc_weight;
+			RETURN title_similarity + desc_similarity;
+		END;
+		$$ LANGUAGE plpgsql IMMUTABLE;`,
 	}
 
 	for _, migration := range migrations {

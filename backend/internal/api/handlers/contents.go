@@ -20,14 +20,19 @@ func RegisterContentRoutes(router *gin.Engine, svc *services.ContentSearchServic
 		sort := strings.TrimSpace(c.Query("sort"))
 		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+		
+		// Validate page_size BEFORE creating request
+		if pageSizeQuery := c.Query("page_size"); pageSizeQuery != "" {
+			if pageSize < 1 || pageSize > maxPageSize {
+				api.SendError(c, api.ErrInvalidParameter("page_size", "must be between 1 and 100"))
+				return
+			}
+		}
+		
 		req := dto.SearchRequest{
 			Keyword: q, ContentType: ct, SortBy: sort, Page: page, PageSize: pageSize,
 		}
 		req.Normalize(1, defaultPageSize, maxPageSize)
-		if req.PageSize < 1 || req.PageSize > maxPageSize {
-			api.SendError(c, api.ErrInvalidParameter("page_size", "must be between 1 and 100"))
-			return
-		}
 		items, total, err := svc.SearchContents(c.Request.Context(), req)
 		if err != nil {
 			api.SendError(c, api.ErrInvalidParameter("search_query", err.Error()))

@@ -144,12 +144,16 @@ func TestContentsSearchIntegration(t *testing.T) {
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
-		assert.Equal(t, http.StatusOK, w.Code)
-
 		var response dto.SearchResponse
 		err := json.Unmarshal(w.Body.Bytes(), &response)
 		require.NoError(t, err)
 
+		// Debug: Print response if not successful
+		if !response.Success {
+			t.Logf("Search failed - Code: %d, Response: %+v", w.Code, response)
+		}
+
+		assert.Equal(t, http.StatusOK, w.Code)
 		assert.True(t, response.Success)
 		assert.Len(t, response.Data, 2) // Should find "Go Programming Tutorial" and "Advanced Go Patterns"
 	})
@@ -336,12 +340,16 @@ func TestErrorHandlingIntegration(t *testing.T) {
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
-		assert.Equal(t, http.StatusBadRequest, w.Code)
-
 		var response dto.SearchResponse
 		err := json.Unmarshal(w.Body.Bytes(), &response)
 		require.NoError(t, err)
 
+		// Debug: Print response
+		if w.Code != http.StatusBadRequest {
+			t.Logf("Expected 400, got %d - Response: %+v", w.Code, response)
+		}
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
 		assert.False(t, response.Success)
 		assert.NotNil(t, response.Error)
 		assert.Equal(t, "INVALID_PARAMETER", response.Error.Code)
