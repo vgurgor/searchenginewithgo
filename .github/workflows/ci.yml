@@ -136,7 +136,6 @@ jobs:
           working-directory: backend
           args: --timeout=5m
           skip-cache: false
-          skip-build-cache: false
 
   frontend-test:
     name: Frontend Tests
