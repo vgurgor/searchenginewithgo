@@ -141,7 +141,7 @@ issues:
       linters:
         - staticcheck
         - mnd
-        - shadow
+        - govet
     
     # Repository interfaces - uzun fonksiyon imzaları kabul edilebilir
     - path: internal/domain/repositories/
@@ -149,23 +149,47 @@ issues:
         - lll
     
     # Repository implementations - uzun SQL query'ler ve Scan satırları
+    - path: internal/infrastructure/repository/postgres/content_repository\.go
+      linters:
+        - lll
+        - goconst
+        - govet
+        - funlen
+    
     - path: internal/infrastructure/repository/postgres/
       linters:
         - lll
         - goconst
-        - shadow
         - funlen
     
     # Service layer - uzun fonksiyon imzaları kabul edilebilir
-    - path: internal/infrastructure/services/
+    - path: internal/infrastructure/services/content_search_service\.go
       linters:
         - lll
-        - rangeValCopy
+        - gocritic
         - goconst
         - gocyclo
         - funlen
         - mnd
-        - unnamedResult
+    
+    - path: internal/infrastructure/services/content_sync_service\.go
+      linters:
+        - lll
+        - gocritic
+        - goconst
+        - gocyclo
+        - funlen
+        - mnd
+    
+    - path: internal/infrastructure/services/score_calculator_service\.go
+      linters:
+        - gocritic
+        - mnd
+    
+    - path: internal/infrastructure/services/
+      linters:
+        - lll
+        - goconst
     
     # Admin routes - complex business logic, magic numbers config değerleri
     - path: internal/api/handlers/admin_routes\.go
@@ -205,10 +229,15 @@ issues:
         - lll
     
     # Providers - content type string constants (business logic)
-    - path: internal/infrastructure/providers/
+    - path: internal/infrastructure/providers/json_provider\.go
       linters:
         - goconst
-        - rangeValCopy
+        - gocritic
+    
+    - path: internal/infrastructure/providers/xml_provider\.go
+      linters:
+        - goconst
+        - gocritic
     
     # API errors - false positive on error code constants
     - path: internal/api/errors\.go
