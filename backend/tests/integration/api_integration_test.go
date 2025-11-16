@@ -49,19 +49,19 @@ func TestHealthEndpoint(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, "healthy", response["status"])
-	
+
 	// Check services health
 	services, ok := response["services"].(map[string]interface{})
 	require.True(t, ok, "services should be a map")
-	
+
 	postgres, ok := services["postgres"].(map[string]interface{})
 	require.True(t, ok, "postgres should be a map")
 	assert.True(t, postgres["healthy"].(bool), "postgres should be healthy")
-	
+
 	redis, ok := services["redis"].(map[string]interface{})
 	require.True(t, ok, "redis should be a map")
 	assert.True(t, redis["healthy"].(bool), "redis should be healthy")
-	
+
 	assert.Contains(t, response, "timestamp")
 	assert.Contains(t, response, "uptime_seconds")
 	assert.Equal(t, "1.0.0-test", response["version"])
