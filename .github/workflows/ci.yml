@@ -85,11 +85,12 @@ jobs:
           go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
       
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           file: ./backend/coverage.out
           flags: backend
           name: backend-coverage
+          token: ${{ secrets.CODECOV_TOKEN }}
       
       - name: Run integration tests
         working-directory: ./backend
@@ -160,7 +161,7 @@ jobs:
         run: npm run build
       
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: frontend-dist
           path: frontend/dist
@@ -215,7 +216,7 @@ jobs:
           output: 'trivy-results.sarif'
       
       - name: Upload Trivy results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'

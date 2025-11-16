@@ -94,7 +94,19 @@ DEPLOY_SSH_KEY=<private-key-content>
 DEPLOY_PORT=22
 DEPLOY_URL=https://your-domain.com
 SLACK_WEBHOOK=https://hooks.slack.com/services/...
+
+# Code Coverage (Opsiyonel)
+CODECOV_TOKEN=<your-codecov-token>
 ```
+
+**Codecov Token Nasıl Alınır:**
+1. https://codecov.io adresine gidin
+2. GitHub ile giriş yapın
+3. Repository'nizi ekleyin
+4. Settings → Repository Upload Token
+5. Token'ı kopyalayıp GitHub Secrets'a ekleyin
+
+**Not:** Codecov kullanmayacaksanız, `ci.yml` dosyasından coverage upload adımını silebilirsiniz.
 
 ### 2. GitHub Container Registry Yapılandırması
 

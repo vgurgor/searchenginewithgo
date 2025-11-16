@@ -1,0 +1,106 @@
+# GitHub Actions Workflows - Değişiklik Geçmişi
+
+## v1.1.0 - 2025-11-16
+
+### 🔄 Action Güncellemeleri (Deprecated Versiyonlar Kaldırıldı)
+
+#### Güncellenen Action'lar:
+
+1. **actions/upload-artifact**: v3 → v4
+   - Dosyalar: `ci.yml`, `scheduled-tasks.yml`, `release.yml`
+   - Sebep: v3 deprecated, GitHub'ın yeni artifact sistemi
+
+2. **actions/download-artifact**: v3 → v4
+   - Dosyalar: `release.yml`
+   - Sebep: v3 deprecated
+
+3. **codecov/codecov-action**: v3 → v4
+   - Dosyalar: `ci.yml`
+   - Değişiklik: Token parametresi eklendi (v4 gereksinimi)
+   - Gerekli secret: `CODECOV_TOKEN`
+
+4. **github/codeql-action/upload-sarif**: v2 → v3
+   - Dosyalar: `ci.yml`
+   - Sebep: v2 deprecated
+
+5. **appleboy/ssh-action**: v1.0.0 → v1.0.3
+   - Dosyalar: `deploy.yml`
+   - Sebep: Bug fixes ve iyileştirmeler
+
+6. **actions/create-release**: v1 → KALDIRILDI
+   - Dosyalar: `release.yml`
+   - Alternatif: `softprops/action-gh-release@v1`
+   - Sebep: v1 deprecated ve artık desteklenmiyor
+
+7. **actions/upload-release-asset**: v1 → KALDIRILDI
+   - Dosyalar: `release.yml`
+   - Alternatif: `softprops/action-gh-release@v1` (asset upload dahil)
+   - Sebep: v1 deprecated
+
+### 🔧 Release Workflow Yeniden Yapılandırıldı
+
+`release.yml` dosyası tamamen yeniden yazıldı:
+- ✅ Modern `softprops/action-gh-release` action'ı kullanılıyor
+- ✅ Otomatik changelog oluşturma (git commits'ten)
+- ✅ Multi-platform binary build korundu
+- ✅ Asset upload otomatik
+- ✅ GitHub Release Notes otomatik oluşturma eklendi
+
+### 📝 Yeni Gereksinimler
+
+#### GitHub Repository Secrets:
+
+**Opsiyonel (Codecov kullanacaksanız):**
+```
+CODECOV_TOKEN - Codecov API token (codecov.io'dan alınır)
+```
+
+#### Codecov Token Nasıl Alınır:
+1. https://codecov.io adresine gidin
+2. GitHub ile giriş yapın
+3. Repository'nizi ekleyin
+4. Settings → Repository Upload Token
+5. Token'ı kopyalayıp GitHub Secrets'a ekleyin
+
+**Not:** Codecov kullanmayacaksanız, `ci.yml` dosyasından coverage upload adımını kaldırabilirsiniz.
+
+### 🐛 Düzeltilen Hatalar
+
+- ✅ "deprecated version of actions/upload-artifact: v3" hatası
+- ✅ "deprecated version of actions/create-release: v1" hatası
+- ✅ "deprecated version of actions/upload-release-asset: v1" hatası
+- ✅ Release workflow'unda asset upload sorunları
+
+### 🚀 İyileştirmeler
+
+1. **Daha Hızlı Artifact İşleme**: v4 artifact sistemi daha hızlı ve güvenilir
+2. **Daha İyi Release Yönetimi**: `softprops/action-gh-release` daha esnek ve özellik zengin
+3. **Otomatik Changelog**: Git commit'lerinden otomatik changelog oluşturma
+4. **GitHub Release Notes**: Otomatik release notes oluşturma aktif
+
+### ⚠️ Breaking Changes
+
+**YOK** - Tüm değişiklikler backward compatible
+
+### 📚 Referanslar
+
+- [GitHub Blog: Artifact Actions v3 Deprecation](https://github.blog/changelog/2024-04-16-deprecation-notice-v3-of-the-artifact-actions/)
+- [actions/upload-artifact v4 Migration Guide](https://github.com/actions/upload-artifact/blob/main/docs/MIGRATION.md)
+- [Codecov Action v4 Documentation](https://github.com/codecov/codecov-action)
+- [softprops/action-gh-release](https://github.com/softprops/action-gh-release)
+
+---
+
+## v1.0.0 - 2025-11-16
+
+### 🎉 İlk Sürüm
+
+- ✅ CI Pipeline (test, lint, build)
+- ✅ Deployment Pipeline
+- ✅ PR Check Automation
+- ✅ Release Management
+- ✅ Scheduled Tasks
+- ✅ Dependabot Configuration
+- ✅ Auto-labeling
+- ✅ CODEOWNERS
+

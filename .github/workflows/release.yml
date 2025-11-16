@@ -10,61 +10,9 @@ permissions:
   packages: write
 
 jobs:
-  create-release:
-    name: Create Release
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      
-      - name: Generate changelog
-        id: changelog
-        uses: metcalfc/changelog-generator@v4.0.1
-        with:
-          myToken: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Create Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref_name }}
-          body: |
-            ## 🚀 Release ${{ github.ref_name }}
-            
-            ### 📝 Changelog
-            ${{ steps.changelog.outputs.changelog }}
-            
-            ### 📦 Docker Images
-            
-            Backend:
-            ```bash
-            docker pull ghcr.io/${{ github.repository }}-backend:${{ github.ref_name }}
-            ```
-            
-            Frontend:
-            ```bash
-            docker pull ghcr.io/${{ github.repository }}-frontend:${{ github.ref_name }}
-            ```
-            
-            ### 🔧 Deployment
-            
-            ```bash
-            # Update docker-compose.production.yml with new tag
-            docker-compose -f docker-compose.production.yml pull
-            docker-compose -f docker-compose.production.yml up -d
-            ```
-          draft: false
-          prerelease: false
-  
   build-release-artifacts:
     name: Build Release Artifacts
     runs-on: ubuntu-latest
-    needs: create-release
     strategy:
       matrix:
         os: [linux, darwin, windows]
@@ -73,6 +21,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -103,24 +53,110 @@ jobs:
               backend/search-engine-${{ matrix.os }}-${{ matrix.arch }}
           fi
       
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: search-engine-${{ matrix.os }}-${{ matrix.arch }}
+          path: |
+            search-engine-${{ matrix.os }}-${{ matrix.arch }}.tar.gz
+            search-engine-${{ matrix.os }}-${{ matrix.arch }}.zip
+          retention-days: 1
+
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: build-release-artifacts
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+      
+      - name: Prepare release assets
+        run: |
+          mkdir -p release-assets
+          find artifacts -type f \( -name "*.tar.gz" -o -name "*.zip" \) -exec cp {} release-assets/ \;
+          ls -la release-assets/
+      
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Generate changelog from git commits
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -z "$PREVIOUS_TAG" ]; then
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" --no-merges)
+          else
+            CHANGELOG=$(git log ${PREVIOUS_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges)
+          fi
+          
+          # Save to file for multiline output
+          echo "$CHANGELOG" > changelog.txt
+          
+          # Set output
+          {
+            echo 'changelog<<EOF'
+            cat changelog.txt
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release ${{ github.ref_name }}
+          body: |
+            ## 🚀 Release ${{ github.ref_name }}
+            
+            ### 📝 Changelog
+            ${{ steps.changelog.outputs.changelog }}
+            
+            ### 📦 Docker Images
+            
+            Backend:
+            ```bash
+            docker pull ghcr.io/${{ github.repository }}-backend:${{ github.ref_name }}
+            ```
+            
+            Frontend:
+            ```bash
+            docker pull ghcr.io/${{ github.repository }}-frontend:${{ github.ref_name }}
+            ```
+            
+            ### 🔧 Deployment
+            
+            ```bash
+            # Update docker-compose.production.yml with new tag
+            docker-compose -f docker-compose.production.yml pull
+            docker-compose -f docker-compose.production.yml up -d
+            ```
+            
+            ### 📥 Binaries
+            
+            Binary dosyaları aşağıdaki platformlar için indirebilirsiniz:
+            - Linux (amd64, arm64)
+            - macOS (amd64, arm64)
+            - Windows (amd64, arm64)
+          files: |
+            release-assets/*
+          draft: false
+          prerelease: false
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: ./search-engine-${{ matrix.os }}-${{ matrix.arch }}.${{ matrix.os == 'windows' && 'zip' || 'tar.gz' }}
-          asset_name: search-engine-${{ matrix.os }}-${{ matrix.arch }}.${{ matrix.os == 'windows' && 'zip' || 'tar.gz' }}
-          asset_content_type: application/octet-stream
 
   notify:
     name: Notify Release
     runs-on: ubuntu-latest
-    needs: [create-release, build-release-artifacts]
+    needs: create-release
+    if: always()
     
     steps:
       - name: Send notification
-        if: always()
         uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
@@ -131,4 +167,3 @@ jobs:
           webhook_url: ${{ secrets.SLACK_WEBHOOK }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
-
