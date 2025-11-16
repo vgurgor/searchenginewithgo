@@ -164,7 +164,7 @@ function App() {
                 <Sparkles className="w-6 h-6 text-gray-950" />
               </div>
               <span className="text-2xl font-bold bg-gradient-to-r from-emerald-400 via-green-400 to-teal-400 bg-clip-text text-transparent">
-                En Çok Uygun Search
+                Search Engine with Go
               </span>
             </div>
             <nav className="flex gap-3">
@@ -296,7 +296,7 @@ function App() {
       <footer className="relative z-10 py-8 mt-20 border-t border-gray-800">
         <div className="max-w-7xl mx-auto px-6 text-center">
           <p className="text-gray-600 text-sm">
-            &copy; 2025 En Çok Uygun Search. Yeni nesil arama deneyimi.
+            &copy; 2025 Search Engine with Go. Yeni nesil arama deneyimi.
           </p>
         </div>
       </footer>
