@@ -22,6 +22,16 @@ type Config struct {
 	Freshness1Week      string
 	Freshness1Month     string
 	Freshness3Months    string
+	// Sync
+	ContentSyncEnabled string
+	ContentSyncInterval string
+	ContentSyncRetryCount string
+	ContentSyncRetryDelay string
+	MetricsChangeThresholdPercent string
+	MetricsChangeThresholdAbsViews string
+	MetricsChangeThresholdAbsLikes string
+	MetricsChangeThresholdAbsReactions string
+	AdminAPIKey string
 }
 
 func Load() Config {
@@ -42,6 +52,15 @@ func Load() Config {
 		Freshness1Week: getenv("FRESHNESS_1_WEEK", "5"),
 		Freshness1Month: getenv("FRESHNESS_1_MONTH", "3"),
 		Freshness3Months: getenv("FRESHNESS_3_MONTHS", "1"),
+		ContentSyncEnabled: getenv("CONTENT_SYNC_ENABLED", "true"),
+		ContentSyncInterval: getenv("CONTENT_SYNC_INTERVAL", "6h"),
+		ContentSyncRetryCount: getenv("CONTENT_SYNC_RETRY_COUNT", "3"),
+		ContentSyncRetryDelay: getenv("CONTENT_SYNC_RETRY_DELAY", "30s"),
+		MetricsChangeThresholdPercent: getenv("METRICS_CHANGE_THRESHOLD_PERCENT", "5"),
+		MetricsChangeThresholdAbsViews: getenv("METRICS_CHANGE_THRESHOLD_ABS_VIEWS", "100"),
+		MetricsChangeThresholdAbsLikes: getenv("METRICS_CHANGE_THRESHOLD_ABS_LIKES", "10"),
+		MetricsChangeThresholdAbsReactions: getenv("METRICS_CHANGE_THRESHOLD_ABS_REACTIONS", "5"),
+		AdminAPIKey: getenv("ADMIN_API_KEY", ""),
 	}
 	return cfg
 }

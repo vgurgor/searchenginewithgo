@@ -74,7 +74,7 @@ func main() {
 	factory.RegisterProvider(jsonProvider)
 	factory.RegisterProvider(xmlProvider)
 	rateLimiter := ratelimiter.NewRedisLimiter(redisClient, cfg.RateLimitEnabled == "true")
-	_ = services.ProviderService{
+	providerSvc := &services.ProviderService{
 		Factory: factory,
 		Limiter: rateLimiter,
 		Logger:  log,
@@ -111,6 +111,32 @@ func main() {
 		job.Start()
 		defer job.Stop()
 	}
+
+	// Content Sync service and job
+	thPercent, _ := strconv.Atoi(cfg.MetricsChangeThresholdPercent)
+	thAbsViews, _ := strconv.Atoi(cfg.MetricsChangeThresholdAbsViews)
+	thAbsLikes, _ := strconv.Atoi(cfg.MetricsChangeThresholdAbsLikes)
+	thAbsReac, _ := strconv.Atoi(cfg.MetricsChangeThresholdAbsReactions)
+	syncSvc := &services.ContentSyncService{
+		Logger:      log,
+		Factory:     factory,
+		Contents:    postgres.NewContentRepository(dbPool),
+		Metrics:     postgres.NewContentMetricsRepository(dbPool),
+		ScoreCalc:   scoreCalc,
+		HistoryRepo: postgres.NewSyncHistoryRepository(dbPool),
+		Thresholds:  services.MetricsThresholds{Percent: thPercent, AbsViews: thAbsViews, AbsLikes: thAbsLikes, AbsReactions: thAbsReac},
+	}
+	if cfg.ContentSyncEnabled == "true" {
+		syncEvery, _ := time.ParseDuration(cfg.ContentSyncInterval)
+		retryCnt, _ := strconv.Atoi(cfg.ContentSyncRetryCount)
+		retryDelay, _ := time.ParseDuration(cfg.ContentSyncRetryDelay)
+		sjob := jobs.NewContentSyncJob(log, syncSvc, syncEvery, true, retryCnt, retryDelay)
+		sjob.Start()
+		defer sjob.Stop()
+	}
+
+	// Admin manual sync endpoint (API key)
+	router.POST("/api/admin/sync", handlers.AdminSyncHandler(log, cfg.AdminAPIKey, syncSvc))
 
 	addr := ":" + cfg.APIPort
 	if port := os.Getenv("PORT"); port != "" {
