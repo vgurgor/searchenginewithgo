@@ -35,6 +35,15 @@ type Config struct {
 	// API pagination
 	DefaultPageSize string
 	MaxPageSize     string
+	// Admin API
+	AdminAPIEnabled string
+	AdminAPIKeyRotationDays string
+	AdminRateLimit string
+	AdminAuditEnabled string
+	// Async Jobs
+	AsyncJobsEnabled string
+	MaxConcurrentJobs string
+	JobTimeout string
 }
 
 func Load() Config {
@@ -66,6 +75,13 @@ func Load() Config {
 		AdminAPIKey: getenv("ADMIN_API_KEY", ""),
 		DefaultPageSize: getenv("DEFAULT_PAGE_SIZE", "20"),
 		MaxPageSize: getenv("MAX_PAGE_SIZE", "100"),
+		AdminAPIEnabled: getenv("ADMIN_API_ENABLED", "true"),
+		AdminAPIKeyRotationDays: getenv("ADMIN_API_KEY_ROTATION_DAYS", "90"),
+		AdminRateLimit: getenv("ADMIN_RATE_LIMIT", "200"),
+		AdminAuditEnabled: getenv("ADMIN_AUDIT_ENABLED", "false"),
+		AsyncJobsEnabled: getenv("ASYNC_JOBS_ENABLED", "true"),
+		MaxConcurrentJobs: getenv("MAX_CONCURRENT_JOBS", "3"),
+		JobTimeout: getenv("JOB_TIMEOUT", "30m"),
 	}
 	return cfg
 }

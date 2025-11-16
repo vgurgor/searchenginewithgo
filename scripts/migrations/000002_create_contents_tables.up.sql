@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS contents (
     url VARCHAR(500) NULL,
     thumbnail_url VARCHAR(500) NULL,
     published_at TIMESTAMPTZ NULL,
+    deleted_at TIMESTAMPTZ NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     UNIQUE(provider_id, provider_content_id)

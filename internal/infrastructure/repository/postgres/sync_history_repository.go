@@ -6,6 +6,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"search_engine/internal/domain/entities"
 	"search_engine/internal/domain/repositories"
+	"strconv"
 )
 
 type syncHistoryRepository struct {
@@ -78,6 +79,62 @@ func (r *syncHistoryRepository) GetAll(ctx context.Context, limit int) ([]entiti
 		out = append(out, h)
 	}
 	return out, rows.Err()
+}
+
+func (r *syncHistoryRepository) List(ctx context.Context, providerID *string, status *entities.SyncStatus, limit, offset int) ([]entities.SyncHistory, error) {
+	q := `
+		SELECT id, provider_id, sync_status, total_fetched, new_contents, updated_contents, skipped_contents, failed_contents, error_message, started_at, completed_at, duration_ms
+		FROM sync_history WHERE 1=1
+	`
+	args := []any{}
+	arg := 1
+	if providerID != nil && *providerID != "" {
+		q += ` AND provider_id = $` + strconv.Itoa(arg)
+		args = append(args, *providerID)
+		arg++
+	}
+	if status != nil && *status != "" {
+		q += ` AND sync_status = $` + strconv.Itoa(arg)
+		args = append(args, *status)
+		arg++
+	}
+	q += ` ORDER BY started_at DESC LIMIT $` + strconv.Itoa(arg) + ` OFFSET $` + strconv.Itoa(arg+1)
+	args = append(args, limit, offset)
+	rows, err := r.pool.Query(ctx, q, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []entities.SyncHistory
+	for rows.Next() {
+		var h entities.SyncHistory
+		if err := rows.Scan(&h.ID, &h.ProviderID, &h.SyncStatus, &h.TotalFetched, &h.NewContents, &h.UpdatedContents, &h.SkippedContents, &h.FailedContents, &h.ErrorMessage, &h.StartedAt, &h.CompletedAt, &h.DurationMs); err != nil {
+			return nil, err
+		}
+		out = append(out, h)
+	}
+	return out, rows.Err()
+}
+
+func (r *syncHistoryRepository) Count(ctx context.Context, providerID *string, status *entities.SyncStatus) (int64, error) {
+	q := `SELECT COUNT(*) FROM sync_history WHERE 1=1`
+	args := []any{}
+	arg := 1
+	if providerID != nil && *providerID != "" {
+		q += ` AND provider_id = $` + strconv.Itoa(arg)
+		args = append(args, *providerID)
+		arg++
+	}
+	if status != nil && *status != "" {
+		q += ` AND sync_status = $` + strconv.Itoa(arg)
+		args = append(args, *status)
+		arg++
+	}
+	var total int64
+	if err := r.pool.QueryRow(ctx, q, args...).Scan(&total); err != nil {
+		return 0, err
+	}
+	return total, nil
 }
 
 

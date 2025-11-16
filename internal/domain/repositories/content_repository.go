@@ -40,6 +40,9 @@ type ContentRepository interface {
 	CountByType(ctx context.Context) (map[entities.ContentType]int64, error)
 	GetAverageScore(ctx context.Context) (float64, error)
 	CountByProvider(ctx context.Context) (map[string]int64, error)
+	SoftDelete(ctx context.Context, id int64) error
+	ListIDsByType(ctx context.Context, t entities.ContentType, offset, limit int) ([]int64, error)
+	GetAverageScoreByProvider(ctx context.Context, providerID string) (float64, error)
 }
 
 type SearchSort string

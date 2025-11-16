@@ -135,8 +135,16 @@ func main() {
 		defer sjob.Stop()
 	}
 
-	// Admin manual sync endpoint (API key)
-	router.POST("/api/admin/sync", handlers.AdminSyncHandler(log, cfg.AdminAPIKey, syncSvc))
+	// Admin API (secured)
+	jobMgr := jobs.NewJobManager()
+	adminHandlers := &handlers.AdminHandlers{
+		Logger: log,
+		Config: cfg,
+		SyncSvc: syncSvc,
+		ScoreCalc: scoreCalc,
+		JobMgr: jobMgr,
+	}
+	handlers.RegisterAdminRoutes(router, adminHandlers)
 
 	// Content search endpoints
 	defPage, _ := strconv.Atoi(cfg.DefaultPageSize)

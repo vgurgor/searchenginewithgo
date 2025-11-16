@@ -279,7 +279,7 @@ func (r *contentRepository) SearchWithFilters(ctx context.Context, keyword strin
 		args = append(args, *contentType)
 		arg++
 	}
-	countSQL := "SELECT COUNT(*) FROM contents c INNER JOIN content_metrics cm ON cm.content_id = c.id " + where
+	countSQL := "SELECT COUNT(*) FROM contents c INNER JOIN content_metrics cm ON cm.content_id = c.id " + where + " AND c.deleted_at IS NULL"
 	var total int64
 	if err := r.pool.QueryRow(ctx, countSQL, args...).Scan(&total); err != nil {
 		return nil, 0, err
@@ -307,6 +307,7 @@ func (r *contentRepository) SearchWithFilters(ctx context.Context, keyword strin
 		FROM contents c
 		INNER JOIN content_metrics cm ON cm.content_id = c.id
 	` + where + `
+	AND c.deleted_at IS NULL
 	` + order + `
 	LIMIT $%d OFFSET $%d
 	`
@@ -342,7 +343,7 @@ func (r *contentRepository) GetDetailByID(ctx context.Context, id int64) (*repos
 			cm.id, cm.content_id, cm.views, cm.likes, cm.reading_time, cm.reactions, cm.final_score, cm.recalculated_at, cm.created_at, cm.updated_at
 		FROM contents c
 		INNER JOIN content_metrics cm ON cm.content_id = c.id
-		WHERE c.id=$1
+		WHERE c.id=$1 AND c.deleted_at IS NULL
 	`
 	var c entities.Content
 	var m entities.ContentMetrics
@@ -357,7 +358,7 @@ func (r *contentRepository) GetDetailByID(ctx context.Context, id int64) (*repos
 }
 
 func (r *contentRepository) CountByType(ctx context.Context) (map[entities.ContentType]int64, error) {
-	rows, err := r.pool.Query(ctx, `SELECT content_type, COUNT(*) FROM contents GROUP BY content_type`)
+	rows, err := r.pool.Query(ctx, `SELECT content_type, COUNT(*) FROM contents WHERE deleted_at IS NULL GROUP BY content_type`)
 	if err != nil {
 		return nil, err
 	}
@@ -376,14 +377,14 @@ func (r *contentRepository) CountByType(ctx context.Context) (map[entities.Conte
 
 func (r *contentRepository) GetAverageScore(ctx context.Context) (float64, error) {
 	var avg float64
-	if err := r.pool.QueryRow(ctx, `SELECT COALESCE(AVG(final_score),0) FROM content_metrics`).Scan(&avg); err != nil {
+	if err := r.pool.QueryRow(ctx, `SELECT COALESCE(AVG(final_score),0) FROM content_metrics cm INNER JOIN contents c ON c.id=cm.content_id WHERE c.deleted_at IS NULL`).Scan(&avg); err != nil {
 		return 0, err
 	}
 	return avg, nil
 }
 
 func (r *contentRepository) CountByProvider(ctx context.Context) (map[string]int64, error) {
-	rows, err := r.pool.Query(ctx, `SELECT provider_id, COUNT(*) FROM contents GROUP BY provider_id`)
+	rows, err := r.pool.Query(ctx, `SELECT provider_id, COUNT(*) FROM contents WHERE deleted_at IS NULL GROUP BY provider_id`)
 	if err != nil {
 		return nil, err
 	}
@@ -398,6 +399,41 @@ func (r *contentRepository) CountByProvider(ctx context.Context) (map[string]int
 		res[pid] = cnt
 	}
 	return res, rows.Err()
+}
+
+func (r *contentRepository) SoftDelete(ctx context.Context, id int64) error {
+	_, err := r.pool.Exec(ctx, `UPDATE contents SET deleted_at=NOW() WHERE id=$1`, id)
+	return err
+}
+
+func (r *contentRepository) ListIDsByType(ctx context.Context, t entities.ContentType, offset, limit int) ([]int64, error) {
+	rows, err := r.pool.Query(ctx, `SELECT id FROM contents WHERE content_type=$1 AND deleted_at IS NULL ORDER BY id LIMIT $2 OFFSET $3`, t, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var ids []int64
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	return ids, rows.Err()
+}
+
+func (r *contentRepository) GetAverageScoreByProvider(ctx context.Context, providerID string) (float64, error) {
+	var avg float64
+	if err := r.pool.QueryRow(ctx, `
+		SELECT COALESCE(AVG(cm.final_score),0)
+		FROM content_metrics cm
+		INNER JOIN contents c ON c.id=cm.content_id
+		WHERE c.provider_id=$1 AND c.deleted_at IS NULL
+	`, providerID).Scan(&avg); err != nil {
+		return 0, err
+	}
+	return avg, nil
 }
 
 

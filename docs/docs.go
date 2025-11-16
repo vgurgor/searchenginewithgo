@@ -13,6 +13,64 @@ var doc = `{
   "host": "localhost:8080",
   "basePath": "/",
   "paths": {
+    "/api/v1/admin/sync": {
+      "post": {
+        "summary": "Admin manual sync",
+        "security": [{"ApiKeyAuth": []}],
+        "responses": {"200":{"description":"OK"},"202":{"description":"Accepted"},"401":{"description":"Unauthorized"}}
+      }
+    },
+    "/api/v1/admin/sync/history": {
+      "get": {
+        "summary": "Admin sync history",
+        "security": [{"ApiKeyAuth": []}],
+        "responses": {"200":{"description":"OK"},"401":{"description":"Unauthorized"}}
+      }
+    },
+    "/api/v1/admin/scores/recalculate": {
+      "post": {
+        "summary": "Admin score recalculation",
+        "security": [{"ApiKeyAuth": []}],
+        "responses": {"200":{"description":"OK"},"202":{"description":"Accepted"},"401":{"description":"Unauthorized"}}
+      }
+    },
+    "/api/v1/admin/providers": {
+      "get": {
+        "summary": "Admin providers info",
+        "security": [{"ApiKeyAuth": []}],
+        "responses": {"200":{"description":"OK"},"401":{"description":"Unauthorized"}}
+      }
+    },
+    "/api/v1/admin/providers/health-check": {
+      "post": {
+        "summary": "Admin providers health check",
+        "security": [{"ApiKeyAuth": []}],
+        "responses": {"200":{"description":"OK"},"401":{"description":"Unauthorized"}}
+      }
+    },
+    "/api/v1/admin/contents/{id}": {
+      "delete": {
+        "summary": "Admin content soft delete",
+        "security": [{"ApiKeyAuth": []}],
+        "parameters":[{"name":"id","in":"path","type":"integer","required":true}],
+        "responses": {"200":{"description":"OK"},"401":{"description":"Unauthorized"}}
+      }
+    },
+    "/api/v1/admin/metrics/dashboard": {
+      "get": {
+        "summary": "Admin dashboard metrics",
+        "security": [{"ApiKeyAuth": []}],
+        "responses": {"200":{"description":"OK"},"401":{"description":"Unauthorized"}}
+      }
+    },
+    "/api/v1/admin/jobs/{jobId}": {
+      "get": {
+        "summary": "Admin job status",
+        "security": [{"ApiKeyAuth": []}],
+        "parameters":[{"name":"jobId","in":"path","type":"string","required":true}],
+        "responses": {"200":{"description":"OK"},"401":{"description":"Unauthorized"}}
+      }
+    },
     "/api/v1/contents/search": {
       "get": {
         "summary": "Search contents",
@@ -50,6 +108,11 @@ var doc = `{
     }
   },
   "definitions": {
+    "ApiKeyAuth": {
+      "type":"apiKey",
+      "name":"X-API-Key",
+      "in":"header"
+    },
     "Content": {
       "type": "object",
       "properties": {
