@@ -13,7 +13,7 @@ import (
 // TestJSONProviderIntegration tests the JSON provider with real mock endpoint
 func TestJSONProviderIntegration(t *testing.T) {
 	t.Skip("Requires mock API server running on localhost:8080")
-	
+
 	// This test assumes the API is running on localhost:8080
 	baseURL := "http://localhost:8080/mock/provider1"
 	provider := providers.NewJSONProvider(baseURL, 10*time.Second)
@@ -43,7 +43,7 @@ func TestJSONProviderIntegration(t *testing.T) {
 // TestXMLProviderIntegration tests the XML provider with real mock endpoint
 func TestXMLProviderIntegration(t *testing.T) {
 	t.Skip("Requires mock API server running on localhost:8080")
-	
+
 	// This test assumes the API is running on localhost:8080
 	baseURL := "http://localhost:8080/mock/provider2"
 	provider := providers.NewXMLProvider(baseURL, 10*time.Second)
