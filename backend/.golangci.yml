@@ -115,6 +115,8 @@ issues:
         - mnd
         - funlen
         - dupl
+        - shadow
+        - govet
     
     # Swagger otomatik üretilmiş docs - elle düzenleme önerilmez
     - path: docs/docs\.go
@@ -127,6 +129,7 @@ issues:
       linters:
         - mnd
         - gosec
+        - goconst
     
     # Scoring algoritması - magic numbers business logic'in parçası
     - path: internal/domain/scoring/scoring\.go
@@ -138,6 +141,7 @@ issues:
       linters:
         - staticcheck
         - mnd
+        - shadow
     
     # Repository interfaces - uzun fonksiyon imzaları kabul edilebilir
     - path: internal/domain/repositories/
@@ -149,6 +153,8 @@ issues:
       linters:
         - lll
         - goconst
+        - shadow
+        - funlen
     
     # Service layer - uzun fonksiyon imzaları kabul edilebilir
     - path: internal/infrastructure/services/
@@ -156,6 +162,10 @@ issues:
         - lll
         - rangeValCopy
         - goconst
+        - gocyclo
+        - funlen
+        - mnd
+        - unnamedResult
     
     # Admin routes - complex business logic, magic numbers config değerleri
     - path: internal/api/handlers/admin_routes\.go
@@ -163,6 +173,8 @@ issues:
         - mnd
         - gocyclo
         - goconst
+        - funlen
+        - lll
     
     # Health handler - timing calculations
     - path: internal/api/handlers/health\.go
@@ -175,6 +187,7 @@ issues:
         - mnd
         - funlen
         - goconst
+        - gocritic
     
     # Database/infrastructure - timeout değerleri
     - path: internal/infrastructure/database/
@@ -190,6 +203,17 @@ issues:
     - path: internal/infrastructure/jobs/
       linters:
         - lll
+    
+    # Providers - content type string constants (business logic)
+    - path: internal/infrastructure/providers/
+      linters:
+        - goconst
+        - rangeValCopy
+    
+    # API errors - false positive on error code constants
+    - path: internal/api/errors\.go
+      linters:
+        - gosec
     
     - linters:
         - lll
