@@ -41,9 +41,9 @@ func main() {
 	defer func(l *zap.Logger) { _ = l.Sync() }(log)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
 
 	dbPool, err := database.ConnectPostgres(ctx, cfg.DatabaseURL)
+	cancel()
 	if err != nil {
 		log.Fatal("postgres connection error", zap.Error(err))
 	}
@@ -194,8 +194,9 @@ func main() {
 	}
 
 	srv := &http.Server{
-		Addr:    addr,
-		Handler: router,
+		Addr:              addr,
+		Handler:           router,
+		ReadHeaderTimeout: 10 * time.Second,
 	}
 
 	log.Info("API starting", zap.String("addr", addr))

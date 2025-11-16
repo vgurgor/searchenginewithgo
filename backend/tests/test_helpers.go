@@ -119,8 +119,8 @@ func SetupTestEnvironment(t *testing.T) *TestEnvironment {
 			cleanupFuncs[i]()
 		}
 		dbPool.Close()
-		rdb.Close()
-		logger.Sync()
+		_ = rdb.Close()
+		_ = logger.Sync()
 	}
 
 	return &TestEnvironment{
@@ -139,7 +139,7 @@ func runMigrations(ctx context.Context, connStr string) error {
 	if err != nil {
 		return fmt.Errorf("failed to open database: %w", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	// Run basic migrations for testing
 	migrations := []string{

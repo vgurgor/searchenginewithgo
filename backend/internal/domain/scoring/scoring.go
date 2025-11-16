@@ -20,10 +20,10 @@ type ScoringEngine struct {
 }
 
 type IScoringService interface {
-	CalculateScore(content entities.Content, metrics entities.ContentMetrics) (float64, error)
+	CalculateScore(content *entities.Content, metrics *entities.ContentMetrics) (float64, error)
 }
 
-func (s *ScoringEngine) CalculateScore(content entities.Content, metrics entities.ContentMetrics) (float64, error) {
+func (s *ScoringEngine) CalculateScore(content *entities.Content, metrics *entities.ContentMetrics) (float64, error) {
 	base := s.calculateBaseScore(content.ContentType, metrics)
 	typeMul := s.getTypeMultiplier(content.ContentType)
 	fresh := s.calculateFreshnessScore(content.PublishedAt)
@@ -32,7 +32,7 @@ func (s *ScoringEngine) CalculateScore(content entities.Content, metrics entitie
 	return round2(final), nil
 }
 
-func (s *ScoringEngine) calculateBaseScore(ct entities.ContentType, m entities.ContentMetrics) float64 {
+func (s *ScoringEngine) calculateBaseScore(ct entities.ContentType, m *entities.ContentMetrics) float64 {
 	switch ct {
 	case entities.ContentTypeVideo:
 		views := float64(max64(m.Views, 0))
@@ -62,7 +62,7 @@ func (s *ScoringEngine) calculateFreshnessScore(p *time.Time) float64 {
 	}
 }
 
-func (s *ScoringEngine) calculateEngagementScore(ct entities.ContentType, m entities.ContentMetrics) float64 {
+func (s *ScoringEngine) calculateEngagementScore(ct entities.ContentType, m *entities.ContentMetrics) float64 {
 	switch ct {
 	case entities.ContentTypeVideo:
 		if m.Views > 0 {
@@ -88,16 +88,16 @@ func round2(v float64) float64 {
 	return math.Round(v*100) / 100
 }
 
-func max64(v int64, min int64) int64 {
-	if v < min {
-		return min
+func max64(v int64, minValue int64) int64 {
+	if v < minValue {
+		return minValue
 	}
 	return v
 }
 
-func maxInt(v int, min int) int {
-	if v < min {
-		return min
+func maxInt(v int, minValue int) int {
+	if v < minValue {
+		return minValue
 	}
 	return v
 }

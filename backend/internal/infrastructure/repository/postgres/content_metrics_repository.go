@@ -76,7 +76,7 @@ func (r *contentMetricsRepository) BulkUpsert(ctx context.Context, metrics []ent
 		`, m.ContentID, m.Views, m.Likes, m.ReadingTime, m.Reactions, m.FinalScore, m.RecalculatedAt)
 	}
 	br := r.pool.SendBatch(ctx, batch)
-	defer br.Close()
+	defer func() { _ = br.Close() }()
 	for range metrics {
 		if _, err := br.Exec(); err != nil {
 			return err

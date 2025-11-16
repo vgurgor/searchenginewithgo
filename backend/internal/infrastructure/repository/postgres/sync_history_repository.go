@@ -2,11 +2,12 @@ package postgres
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+
 	"search_engine/internal/domain/entities"
 	"search_engine/internal/domain/repositories"
-	"strconv"
 )
 
 type syncHistoryRepository struct {

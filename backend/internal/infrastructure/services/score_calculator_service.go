@@ -19,7 +19,7 @@ type ScoreCalculatorService struct {
 	Logger   *zap.Logger
 }
 
-func (s *ScoreCalculatorService) ProcessNewContent(ctx context.Context, pc providers.ProviderContent) (int64, float64, error) {
+func (s *ScoreCalculatorService) ProcessNewContent(ctx context.Context, pc *providers.ProviderContent) (int64, float64, error) {
 	c := entities.Content{
 		ProviderID:        pc.ProviderID,
 		ProviderContentID: pc.ProviderContentID,
@@ -40,7 +40,7 @@ func (s *ScoreCalculatorService) ProcessNewContent(ctx context.Context, pc provi
 		ReadingTime: valInt(pc.ReadingTime),
 		Reactions:   valInt(pc.Reactions),
 	}
-	score, err := s.Engine.CalculateScore(c, m)
+	score, err := s.Engine.CalculateScore(&c, &m)
 	if err != nil {
 		return c.ID, 0, err
 	}
@@ -63,7 +63,7 @@ func (s *ScoreCalculatorService) RecalculateScore(ctx context.Context, contentID
 	if err != nil {
 		return 0, err
 	}
-	score, err := s.Engine.CalculateScore(*c, *m)
+	score, err := s.Engine.CalculateScore(c, m)
 	if err != nil {
 		return 0, err
 	}

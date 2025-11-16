@@ -132,7 +132,7 @@ func (s *ContentSyncService) SyncProvider(ctx context.Context, providerID string
 			continue
 		}
 		// new content
-		if _, _, err := s.ScoreCalc.ProcessNewContent(ctx, pc); err != nil {
+		if _, _, err := s.ScoreCalc.ProcessNewContent(ctx, &pc); err != nil {
 			res.FailedContents++
 			s.Logger.Error("new content processing failed", zap.String("provider", providerID), zap.Error(err))
 			continue

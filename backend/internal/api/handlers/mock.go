@@ -11,31 +11,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Provider1 JSON mock
-type provider1Item struct {
-	ID         string `json:"id"`
-	Heading    string `json:"heading"`
-	Type       string `json:"type"`
-	Summary    string `json:"summary"`
-	VideoURL   string `json:"video_url,omitempty"`
-	ArticleURL string `json:"article_url,omitempty"`
-	Thumbnail  string `json:"thumbnail,omitempty"`
-	ReadDur    int    `json:"read_duration,omitempty"`
-	Stats      struct {
-		ViewCount int64 `json:"view_count,omitempty"`
-		LikeCount int64 `json:"like_count,omitempty"`
-	} `json:"statistics,omitempty"`
-	Engagement struct {
-		ReactionCount int `json:"reaction_count,omitempty"`
-	} `json:"engagement,omitempty"`
-	ReleaseDate time.Time `json:"release_date"`
-}
-
-type provider1Resp struct {
-	Items []provider1Item `json:"items"`
-	Total int             `json:"total"`
-}
-
 // File-backed schema for provider1.json at repo root
 type provider1File struct {
 	Contents []struct {
@@ -65,7 +40,7 @@ func MockProvider1Handler(c *gin.Context) {
 	// Try to serve from file if path is provided
 	if fp := os.Getenv("PROVIDER1_FILE_PATH"); fp != "" {
 		if f, err := os.Open(fp); err == nil {
-			defer f.Close()
+			defer func() { _ = f.Close() }()
 			var raw provider1File
 			if err := json.NewDecoder(f).Decode(&raw); err == nil {
 				// Return the file content as-is (in the new format)
@@ -206,7 +181,7 @@ func MockProvider2Handler(c *gin.Context) {
 	// Try to serve from file if path is provided
 	if fp := os.Getenv("PROVIDER2_FILE_PATH"); fp != "" {
 		if f, err := os.Open(fp); err == nil {
-			defer f.Close()
+			defer func() { _ = f.Close() }()
 			var raw provider2File
 			if err := xml.NewDecoder(f).Decode(&raw); err == nil {
 				// Return the file content as-is (in the new format)

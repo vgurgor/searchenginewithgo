@@ -145,7 +145,7 @@ func (r *contentRepository) BulkInsert(ctx context.Context, contents []entities.
 		`, c.ProviderID, c.ProviderContentID, c.Title, c.ContentType, c.Description, c.URL, c.ThumbnailURL, c.PublishedAt)
 	}
 	br := r.pool.SendBatch(ctx, batch)
-	defer br.Close()
+	defer func() { _ = br.Close() }()
 	for range contents {
 		if _, err := br.Exec(); err != nil {
 			return err

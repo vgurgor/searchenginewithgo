@@ -67,12 +67,12 @@ func (p *JSONProvider) FetchContents() ([]domainp.ProviderContent, error) {
 	q.Set("offset", fmt.Sprintf("%d", p.Offset))
 	u.RawQuery = q.Encode()
 
-	req, _ := http.NewRequest(http.MethodGet, u.String(), nil)
+	req, _ := http.NewRequest(http.MethodGet, u.String(), http.NoBody)
 	resp, err := p.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("status %d from provider1", resp.StatusCode)
 	}

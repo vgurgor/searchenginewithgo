@@ -259,15 +259,15 @@ func (s *ContentSearchService) GetStats(ctx context.Context) (dto.StatsDTO, erro
 	}, nil
 }
 
-func truncateOrNil(s *string, max int) *string {
+func truncateOrNil(s *string, maxLen int) *string {
 	if s == nil {
 		return nil
 	}
 	r := []rune(*s)
-	if len(r) <= max {
+	if len(r) <= maxLen {
 		return s
 	}
-	tr := string(r[:max])
+	tr := string(r[:maxLen])
 	return &tr
 }
 

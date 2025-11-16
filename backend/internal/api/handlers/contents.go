@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+
 	"search_engine/internal/api"
 	"search_engine/internal/api/dto"
 	"search_engine/internal/infrastructure/services"

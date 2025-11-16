@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"go.uber.org/zap"
+
 	"search_engine/internal/infrastructure/services"
 )
 

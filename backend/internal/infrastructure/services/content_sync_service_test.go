@@ -214,7 +214,7 @@ func TestContentSyncService_NewAndUpdate(t *testing.T) {
 
 type mockEngine struct{}
 
-func (m *mockEngine) CalculateScore(content entities.Content, metrics entities.ContentMetrics) (float64, error) {
+func (m *mockEngine) CalculateScore(content *entities.Content, metrics *entities.ContentMetrics) (float64, error) {
 	return 42.0, nil
 }
 
