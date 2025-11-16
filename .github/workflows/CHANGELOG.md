@@ -97,12 +97,17 @@ CODECOV_TOKEN - Codecov API token (codecov.io'dan alınır)
 - ✅ go vet "time imported and not used" hatası (`redis_limiter_test.go`)
 - ✅ go vet "redis redeclared in this block" hatası (`test_helpers.go`)
 - ✅ Import çakışması (redis client vs redis testcontainer)
+- ✅ golangci-lint "no go files to analyze" hatası
+- ✅ backend-lint job'unda eksik dependency download
+- ✅ Go version uyumsuzluğu (CI: 1.21 vs go.mod: 1.22)
 - ✅ Release workflow'unda asset upload sorunları
 
-### 📦 Go Module Güncellemeleri
+### 📦 Go Module ve Version Güncellemeleri
 
 **Go Version:**
-- `go 1.22` (Dockerfile ile uyumlu)
+- `go 1.22` (Dockerfile ve CI ile uyumlu)
+- GitHub Actions `GO_VERSION` 1.21 → 1.22 güncellendi
+- `backend-lint` job'una `go mod download` eklendi
 
 **Eklenen Test Dependencies:**
 - `testcontainers/testcontainers-go` v0.40.0
