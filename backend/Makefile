@@ -79,9 +79,7 @@ check-go-version: ## Check if go.mod has correct Go version (1.22)
 
 fix-go-version: ## Fix go.mod to use Go 1.22
 	@echo "Fixing go.mod to use Go 1.22..."
-	@sed -i.bak 's/^go 1\.24\..*/go 1.22/' go.mod
-	@rm -f go.mod.bak
-	@go mod tidy
+	@go mod edit -go=1.22
 	@echo "✅ Fixed! go.mod now uses Go 1.22"
 	@echo ""
 	@grep "^go " go.mod

@@ -1,11 +1,11 @@
 # Base with dependencies cached
 FROM golang:1.22-alpine AS base
 WORKDIR /app
+ENV GOTOOLCHAIN=auto
 RUN apk add --no-cache git ca-certificates build-base
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-ENV GOTOOLCHAIN=auto
 RUN go mod tidy
 
 # Builder for production binary

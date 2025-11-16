@@ -16,13 +16,28 @@ Bu proje **Go 1.22** ile geliştirilmiştir ve tüm sistem bu versiyona göre ya
 
 `go mod tidy` veya `go get` komutları bazen Go version'ı otomatik olarak güncelleyebilir. Bu sorunu önlemek için:
 
-**go.mod başına yorum eklendi:**
+**1. go.mod başına yorum eklendi:**
 ```go
 // IMPORTANT: Keep go version at 1.22 for Dockerfile compatibility
 // DO NOT change to 1.24.0 - it's not released yet and will break Docker build
 module search_engine
 
 go 1.22
+```
+
+**2. Dockerfile'da GOTOOLCHAIN=auto erkene alındı:**
+```dockerfile
+FROM golang:1.22-alpine AS base
+WORKDIR /app
+ENV GOTOOLCHAIN=auto  # ✅ En başta!
+RUN apk add --no-cache git ca-certificates build-base
+COPY go.mod go.sum ./
+RUN go mod download  # GOTOOLCHAIN=auto sayesinde Go 1.23+ modüller çalışır
+```
+
+**3. Otomatik düzeltme komutu:**
+```bash
+make fix-go-version  # go mod edit -go=1.22 kullanır
 ```
 
 ### ✅ Doğru Kurulum

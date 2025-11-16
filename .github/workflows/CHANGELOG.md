@@ -121,9 +121,17 @@ CODECOV_TOKEN - Codecov API token (codecov.io'dan alınır)
 
 **Güncellenen Dependencies:**
 - `redis/go-redis/v9` v9.5.1 → v9.7.3
-- `grpc-ecosystem/grpc-gateway/v2` v2.27.3 → v2.22.0 (Go 1.22 uyumluluğu için downgrade)
+- `grpc-ecosystem/grpc-gateway/v2` v2.27.3 → v2.22.0 (Go 1.22 için)
+- `mdelapenya/tlscert` v0.2.0 → v0.1.0 (Go 1.22 için)
+- `testcontainers/testcontainers-go` v0.40.0 → v0.36.0 (Go 1.22 için)
+- `testcontainers/modules/postgres` v0.40.0 → v0.36.0 (Go 1.22 için)
+- `testcontainers/modules/redis` v0.40.0 → v0.36.0 (Go 1.22 için)
 
-**Not:** `go mod tidy` çalıştırıldı ve tüm eksik dependencies eklendi. Go version 1.22'de sabitlendi (Dockerfile uyumu için). grpc-gateway v2.27.3, Go 1.24.0 gerektirdiği için v2.22.0'a downgrade edildi.
+**Dockerfile Güncellemesi:**
+- `ENV GOTOOLCHAIN=auto` direktifi go mod download'dan önceye taşındı
+- Bu sayede Go 1.22 ile daha yüksek version gerektiren modüller çalışabiliyor
+
+**Not:** `go mod tidy` çalıştırıldı. Go version `go mod edit -go=1.22` ile sabitlendi. Dockerfile'da `GOTOOLCHAIN=auto` ile uyumluluk sağlandı.
 
 ### 🚀 İyileştirmeler
 
