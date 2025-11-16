@@ -40,7 +40,7 @@ func (r *RedisLimiter) CheckLimit(ctx context.Context, providerID string, limit 
 		return false, err
 	}
 	var cnt int64
-	_ = fmt.Sscanf(cntStr, "%d", &cnt)
+	_, _ = fmt.Sscanf(cntStr, "%d", &cnt)
 	return cnt < int64(limit), nil
 }
 
