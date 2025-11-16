@@ -158,7 +158,6 @@ func (r *syncHistoryRepository) Count(ctx context.Context, providerID *string, s
 	if status != nil && *status != "" {
 		q += ` AND sync_status = $` + strconv.Itoa(arg)
 		args = append(args, *status)
-		arg++
 	}
 	var total int64
 	if err := r.pool.QueryRow(ctx, q, args...).Scan(&total); err != nil {

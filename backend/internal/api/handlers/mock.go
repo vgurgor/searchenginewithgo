@@ -126,7 +126,7 @@ func MockProvider1Handler(c *gin.Context) {
 	})
 }
 
-// Provider2 XML mock
+// Provider2Feed represents Provider2 XML feed structure
 type Provider2Feed struct {
 	XMLName xml.Name        `xml:"feed"`
 	Items   []Provider2Item `xml:"content"`

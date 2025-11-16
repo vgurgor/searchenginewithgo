@@ -42,7 +42,7 @@ func (s *ContentSearchService) SearchContents(ctx context.Context, req dto.Searc
 			return nil, 0, errors.New("invalid content type")
 		}
 	}
-	var sort repositories.SearchSort = repositories.SearchSortScoreDesc
+	sort := repositories.SearchSortScoreDesc
 	switch req.SortBy {
 	case "score_desc":
 		sort = repositories.SearchSortScoreDesc
@@ -243,7 +243,7 @@ func (s *ContentSearchService) GetStats(ctx context.Context) (dto.StatsDTO, erro
 		}
 		providers = append(providers, entry)
 	}
-	var lastSyncTime *int64 = lastSync
+	lastSyncTime := lastSync
 	var lastSyncPtr *time.Time
 	if lastSyncTime != nil {
 		t := time.Unix(*lastSyncTime, 0).UTC()

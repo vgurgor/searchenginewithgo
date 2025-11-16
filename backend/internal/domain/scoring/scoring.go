@@ -88,14 +88,14 @@ func round2(v float64) float64 {
 	return math.Round(v*100) / 100
 }
 
-func max64(v int64, minValue int64) int64 {
+func max64(v, minValue int64) int64 {
 	if v < minValue {
 		return minValue
 	}
 	return v
 }
 
-func maxInt(v int, minValue int) int {
+func maxInt(v, minValue int) int {
 	if v < minValue {
 		return minValue
 	}

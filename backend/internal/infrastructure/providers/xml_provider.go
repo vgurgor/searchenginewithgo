@@ -1,6 +1,7 @@
 package providers
 
 import (
+	"context"
 	"encoding/xml"
 	"fmt"
 	"net"
@@ -66,7 +67,7 @@ func (p *XMLProvider) FetchContents() ([]domainp.ProviderContent, error) {
 	q.Set("size", fmt.Sprintf("%d", p.Size))
 	u.RawQuery = q.Encode()
 
-	req, _ := http.NewRequest(http.MethodGet, u.String(), http.NoBody)
+	req, _ := http.NewRequestWithContext(context.Background(), http.MethodGet, u.String(), http.NoBody)
 	resp, err := p.Client.Do(req)
 	if err != nil {
 		return nil, err

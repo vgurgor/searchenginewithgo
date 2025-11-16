@@ -157,7 +157,7 @@ func getHTTPStatusForErrorCode(code ErrorCode) int {
 	}
 }
 
-// Common error constructors for convenience
+// ErrInvalidParameter creates an error for invalid parameters
 func ErrInvalidParameter(param, reason string) *Error {
 	return NewError(ErrCodeInvalidParameter, "Invalid parameter").
 		WithDetails("parameter", param).

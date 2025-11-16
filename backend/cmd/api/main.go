@@ -45,12 +45,14 @@ func main() {
 	dbPool, err := database.ConnectPostgres(ctx, cfg.DatabaseURL)
 	cancel()
 	if err != nil {
+		_ = log.Sync()
 		log.Fatal("postgres connection error", zap.Error(err))
 	}
 	defer dbPool.Close()
 
 	redisClient, err := cache.NewRedisClient(cfg.RedisURL)
 	if err != nil {
+		_ = log.Sync()
 		log.Fatal("redis connection error", zap.Error(err))
 	}
 	defer func() { _ = redisClient.Close() }()
