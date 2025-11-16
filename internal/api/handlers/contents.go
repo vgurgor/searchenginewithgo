@@ -50,7 +50,7 @@ func RegisterContentRoutes(router *gin.Engine, svc *services.ContentSearchServic
 		idStr := c.Param("id")
 		id, err := strconv.ParseInt(idStr, 10, 64)
 		if err != nil || id <= 0 {
-			c.JSON(http.StatusNotFound, dto.ContentResponse{
+			c.JSON(http.StatusNotFound, dto.APIContentResponse{
 				Success: false,
 				Error:   &dto.ErrorDTO{Code: "CONTENT_NOT_FOUND", Message: "Content not found"},
 			})
@@ -58,13 +58,13 @@ func RegisterContentRoutes(router *gin.Engine, svc *services.ContentSearchServic
 		}
 		item, err := svc.GetContentByID(c.Request.Context(), id)
 		if err != nil || item == nil {
-			c.JSON(http.StatusNotFound, dto.ContentResponse{
+			c.JSON(http.StatusNotFound, dto.APIContentResponse{
 				Success: false,
 				Error:   &dto.ErrorDTO{Code: "CONTENT_NOT_FOUND", Message: "Content not found"},
 			})
 			return
 		}
-		c.JSON(http.StatusOK, dto.ContentResponse{Success: true, Data: item})
+		c.JSON(http.StatusOK, dto.APIContentResponse{Success: true, Data: item})
 	})
 	v1.GET("/stats", func(c *gin.Context) {
 		stats, err := svc.GetStats(c.Request.Context())

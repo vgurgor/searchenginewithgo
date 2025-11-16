@@ -9,7 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"github.com/swaggo/files"
+	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"go.uber.org/zap"
 
@@ -70,7 +70,7 @@ func main() {
 	router.GET("/mock/provider2/feed", handlers.MockProvider2Handler)
 
 	// Swagger UI served by gin-swagger at /swagger/index.html
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(files.Handler))
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Provider factory and service wiring (for use in future endpoints/jobs)
 	providerTimeout, _ := time.ParseDuration(cfg.ProviderTimeout)
@@ -80,7 +80,7 @@ func main() {
 	factory.RegisterProvider(jsonProvider)
 	factory.RegisterProvider(xmlProvider)
 	rateLimiter := ratelimiter.NewRedisLimiter(redisClient, cfg.RateLimitEnabled == "true")
-	providerSvc := &services.ProviderService{
+	_ = &services.ProviderService{
 		Factory: factory,
 		Limiter: rateLimiter,
 		Logger:  log,

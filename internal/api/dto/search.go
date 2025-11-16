@@ -71,7 +71,7 @@ type SearchResponse struct {
 	Error      *ErrorDTO          `json:"error,omitempty"`
 }
 
-type ContentResponse struct {
+type APIContentResponse struct {
 	Success bool             `json:"success"`
 	Data    *ContentDetailDTO`json:"data,omitempty"`
 	Error   *ErrorDTO        `json:"error,omitempty"`

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 echo "Running migrations..."
-docker compose run --rm migrate up
+docker compose run --rm migrate
 echo "Migrations completed."
 
 
