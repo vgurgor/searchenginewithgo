@@ -94,6 +94,19 @@ CODECOV_TOKEN - Codecov API token (codecov.io'dan alınır)
 - ✅ Import sıralaması ve kod stili iyileştirildi
 - ✅ Release workflow'unda asset upload sorunları
 
+### 📦 Go Module Güncellemeleri
+
+**Eklenen Test Dependencies:**
+- `testcontainers/testcontainers-go` v0.40.0
+- `testcontainers/testcontainers-go/modules/postgres` v0.40.0
+- `testcontainers/testcontainers-go/modules/redis` v0.40.0
+- `stretchr/testify` v1.11.1
+
+**Güncellenen Dependencies:**
+- `redis/go-redis/v9` v9.5.1 → v9.7.3
+
+**Not:** `go mod tidy` çalıştırıldı ve tüm eksik dependencies eklendi.
+
 ### 🚀 İyileştirmeler
 
 1. **Daha Hızlı Artifact İşleme**: v4 artifact sistemi daha hızlı ve güvenilir
@@ -101,6 +114,8 @@ CODECOV_TOKEN - Codecov API token (codecov.io'dan alınır)
 3. **Otomatik Changelog**: Git commit'lerinden otomatik changelog oluşturma
 4. **GitHub Release Notes**: Otomatik release notes oluşturma aktif
 5. **Security Scanning İyileştirildi**: CodeQL v4 + doğru permission'lar
+6. **Code Formatting**: 54 Go dosyası `gofmt -s -w` ile formatlandı
+7. **Module Management**: `go mod tidy` ile eksik dependencies eklendi
 
 ### ⚠️ Breaking Changes
 

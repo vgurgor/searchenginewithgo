@@ -71,7 +71,6 @@ linters:
     - dogsled
     - dupl
     - errcheck
-    - exportloopref
     - funlen
     - gochecknoinits
     - goconst
@@ -98,6 +97,7 @@ linters:
     - unparam
     - unused
     - whitespace
+    # exportloopref deprecated (Go 1.22+ loopvar ile değiştirildi)
     # maligned deprecated, fieldalignment kullanılıyor (govet içinde)
 
 issues:
