@@ -94,6 +94,9 @@ CODECOV_TOKEN - Codecov API token (codecov.io'dan alınır)
 - ✅ Import sıralaması ve kod stili iyileştirildi
 - ✅ Go version uyumsuzluğu (1.24.0 → 1.22, Dockerfile ile uyumlu)
 - ✅ Docker build "go.mod requires go >= 1.24.0" hatası
+- ✅ go vet "time imported and not used" hatası (`redis_limiter_test.go`)
+- ✅ go vet "redis redeclared in this block" hatası (`test_helpers.go`)
+- ✅ Import çakışması (redis client vs redis testcontainer)
 - ✅ Release workflow'unda asset upload sorunları
 
 ### 📦 Go Module Güncellemeleri

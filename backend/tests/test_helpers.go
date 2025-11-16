@@ -13,7 +13,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
-	"github.com/testcontainers/testcontainers-go/modules/redis"
+	rediscontainer "github.com/testcontainers/testcontainers-go/modules/redis"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
@@ -58,7 +58,7 @@ func SetupTestEnvironment(t *testing.T) *TestEnvironment {
 	}
 
 	// Start Redis container
-	redisContainer, err := redis.RunContainer(ctx,
+	redisContainer, err := rediscontainer.RunContainer(ctx,
 		testcontainers.WithImage("redis:7-alpine"),
 		testcontainers.WithWaitStrategy(
 			wait.ForLog("Ready to accept connections").
