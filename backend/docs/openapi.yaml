@@ -1,0 +1,945 @@
+openapi: 3.0.3
+info:
+  title: Search Engine API
+  version: "1.0"
+  description: |
+    A comprehensive content search engine API that aggregates content from multiple providers (JSON/XML),
+    calculates relevance scores, and provides search and filtering capabilities.
+
+    ## Features
+    - Multi-provider content aggregation (JSON/XML)
+    - Advanced scoring algorithm with freshness and engagement metrics
+    - Full-text search with fuzzy matching
+    - Content type filtering (video/text)
+    - Rate limiting and caching
+    - Admin dashboard for monitoring and management
+
+    ## Authentication
+    Admin endpoints require X-API-Key header with the configured API key.
+
+servers:
+  - url: http://localhost:8080
+    description: Development server
+  - url: https://api.search-engine.com
+    description: Production server
+
+security:
+  - ApiKeyAuth: []
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Returns the health status of all system components
+      tags:
+        - Health
+      responses:
+        '200':
+          description: All services are healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "healthy"
+                  postgres:
+                    type: boolean
+                    example: true
+                  redis:
+                    type: boolean
+                    example: true
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: "2024-01-01T12:00:00Z"
+                  uptime_seconds:
+                    type: integer
+                    example: 3600
+                  version:
+                    type: string
+                    example: "1.0.0"
+
+  /swagger/*any:
+    get:
+      summary: Swagger UI
+      description: Interactive API documentation
+      tags:
+        - Documentation
+      responses:
+        '200':
+          description: Swagger UI page
+
+  /api/v1/contents/search:
+    get:
+      summary: Search contents
+      description: |
+        Search through aggregated content with advanced filtering and sorting.
+
+        Supports fuzzy search on titles and descriptions, content type filtering,
+        and multiple sorting options including relevance scores.
+      tags:
+        - Content
+      parameters:
+        - name: q
+          in: query
+          description: Search keyword (supports fuzzy matching)
+          required: false
+          schema:
+            type: string
+            example: "python tutorial"
+        - name: type
+          in: query
+          description: Content type filter
+          required: false
+          schema:
+            type: string
+            enum: [video, text]
+            example: "video"
+        - name: sort
+          in: query
+          description: Sort order
+          required: false
+          schema:
+            type: string
+            enum: [score_desc, score_asc, date_desc, date_asc]
+            default: score_desc
+            example: "score_desc"
+        - name: page
+          in: query
+          description: Page number (1-based)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+            example: 1
+        - name: page_size
+          in: query
+          description: Items per page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+            example: 20
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+        '400':
+          description: Invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/contents/{id}:
+    get:
+      summary: Get content details
+      description: Retrieve detailed information about a specific content item
+      tags:
+        - Content
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Content ID
+          schema:
+            type: integer
+            format: int64
+            example: 123
+      responses:
+        '200':
+          description: Content details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentDetailResponse'
+        '404':
+          description: Content not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/contents/stats:
+    get:
+      summary: Get content statistics
+      description: Retrieve overall statistics about the content database
+      tags:
+        - Content
+      responses:
+        '200':
+          description: Statistics data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatsResponse'
+
+  /api/v1/admin/sync:
+    post:
+      summary: Trigger content synchronization
+      description: |
+        Manually trigger content synchronization from providers.
+        Can sync all providers or a specific provider.
+      tags:
+        - Admin
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                provider_id:
+                  type: string
+                  description: Specific provider to sync (optional)
+                  example: "provider1"
+                force:
+                  type: boolean
+                  description: Force sync even if recently synced
+                  default: false
+                  example: false
+                async:
+                  type: boolean
+                  description: Run asynchronously (returns job ID)
+                  default: true
+                  example: true
+      responses:
+        '200':
+          description: Sync completed synchronously
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      results:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/SyncResult'
+        '202':
+          description: Async job started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Sync job started"
+                  job_id:
+                    type: string
+                    example: "sync-12345"
+                  data:
+                    type: object
+                    properties:
+                      provider_id:
+                        type: string
+                        nullable: true
+                      started_at:
+                        type: string
+                        format: date-time
+        '401':
+          description: Unauthorized - Invalid API key
+        '400':
+          description: Invalid request body
+
+  /api/v1/admin/sync/history:
+    get:
+      summary: Get synchronization history
+      description: Retrieve the history of content synchronization operations
+      tags:
+        - Admin
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: provider_id
+          in: query
+          description: Filter by provider ID
+          schema:
+            type: string
+            example: "provider1"
+        - name: status
+          in: query
+          description: Filter by sync status
+          schema:
+            type: string
+            enum: [success, partial, failed, in_progress, skipped]
+            example: "success"
+        - name: limit
+          in: query
+          description: Maximum number of results
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+            example: 50
+        - name: offset
+          in: query
+          description: Pagination offset
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+            example: 0
+      responses:
+        '200':
+          description: Sync history
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SyncHistoryEntry'
+                  pagination:
+                    type: object
+                    properties:
+                      limit:
+                        type: integer
+                        example: 50
+                      offset:
+                        type: integer
+                        example: 0
+                      total:
+                        type: integer
+                        example: 150
+
+  /api/v1/admin/scores/recalculate:
+    post:
+      summary: Recalculate content scores
+      description: |
+        Recalculate scores for content items. Can target specific content,
+        all content of a type, or all content.
+      tags:
+        - Admin
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content_id:
+                  type: integer
+                  format: int64
+                  description: Specific content ID to recalculate
+                  example: 123
+                content_type:
+                  type: string
+                  enum: [video, text]
+                  description: Recalculate all content of this type
+                  example: "video"
+                recalculate_all:
+                  type: boolean
+                  description: Recalculate all content scores
+                  default: false
+                  example: false
+      responses:
+        '200':
+          description: Recalculation completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '202':
+          description: Async job started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Score recalculation job started"
+                  job_id:
+                    type: string
+                    example: "recalc-12345"
+                  data:
+                    type: object
+                    properties:
+                      started_at:
+                        type: string
+                        format: date-time
+
+  /api/v1/admin/providers:
+    get:
+      summary: Get provider statistics
+      description: Retrieve statistics for all content providers
+      tags:
+        - Admin
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Provider statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        provider_id:
+                          type: string
+                          example: "provider1"
+                        content_count:
+                          type: integer
+                          format: int64
+                          example: 1250
+                        average_score:
+                          type: number
+                          format: float
+                          example: 45.67
+                        last_sync:
+                          type: string
+                          format: date-time
+                          nullable: true
+                        last_sync_status:
+                          type: string
+                          enum: [success, partial, failed, in_progress, skipped]
+                          nullable: true
+
+  /api/v1/admin/providers/health-check:
+    post:
+      summary: Check provider health
+      description: Perform health checks on all content providers
+      tags:
+        - Admin
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Health check results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        provider_id:
+                          type: string
+                          example: "provider1"
+                        is_healthy:
+                          type: boolean
+                          example: true
+                        response_time_ms:
+                          type: integer
+                          example: 150
+                        status_code:
+                          type: integer
+                          example: 200
+                        checked_at:
+                          type: string
+                          format: date-time
+                        error:
+                          type: string
+                          nullable: true
+
+  /api/v1/admin/contents/{id}:
+    delete:
+      summary: Soft delete content
+      description: Mark a content item as deleted (soft delete)
+      tags:
+        - Admin
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Content ID to delete
+          schema:
+            type: integer
+            format: int64
+            example: 123
+      responses:
+        '200':
+          description: Content deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        format: int64
+                        example: 123
+                      deleted_at:
+                        type: string
+                        format: date-time
+        '400':
+          description: Invalid content ID
+        '404':
+          description: Content not found
+
+  /api/v1/admin/metrics/dashboard:
+    get:
+      summary: Get dashboard metrics
+      description: Retrieve comprehensive metrics for the admin dashboard
+      tags:
+        - Admin
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Dashboard metrics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      overview:
+                        type: object
+                        properties:
+                          total_contents:
+                            type: integer
+                            format: int64
+                            example: 15420
+                          total_videos:
+                            type: integer
+                            format: int64
+                            example: 8920
+                          total_texts:
+                            type: integer
+                            format: int64
+                            example: 6500
+                          average_score:
+                            type: number
+                            format: float
+                            example: 42.85
+                          providers_count:
+                            type: integer
+                            example: 2
+                      sync_stats:
+                        type: object
+                        properties:
+                          last_sync:
+                            type: string
+                            format: date-time
+                            nullable: true
+                          total_syncs:
+                            type: integer
+                            format: int64
+                            example: 145
+                      content_distribution:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/StatsProviderDTO'
+
+  /api/v1/admin/jobs/{jobId}:
+    get:
+      summary: Get job status
+      description: Retrieve the status of an asynchronous job
+      tags:
+        - Admin
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          description: Job ID
+          schema:
+            type: string
+            example: "sync-12345"
+      responses:
+        '200':
+          description: Job status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Job'
+        '404':
+          description: Job not found
+
+  /mock/provider1/contents:
+    get:
+      summary: Mock Provider 1 Contents
+      description: Mock endpoint for testing Provider 1 JSON responses
+      tags:
+        - Mock
+      responses:
+        '200':
+          description: Mock provider response
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /mock/provider2/feed:
+    get:
+      summary: Mock Provider 2 Feed
+      description: Mock endpoint for testing Provider 2 XML responses
+      tags:
+        - Mock
+      responses:
+        '200':
+          description: Mock provider response
+          content:
+            application/xml:
+              schema:
+                type: object
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: Admin API key for authentication
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: "INVALID_PARAMETER"
+            message:
+              type: string
+              example: "Invalid parameter value"
+            details:
+              type: object
+              additionalProperties:
+                type: string
+
+    ContentSummaryDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 123
+        title:
+          type: string
+          example: "Introduction to Go Programming"
+        content_type:
+          type: string
+          enum: [video, text]
+          example: "video"
+        description:
+          type: string
+          nullable: true
+          example: "Learn the basics of Go programming language"
+        url:
+          type: string
+          nullable: true
+          example: "https://example.com/video123"
+        thumbnail_url:
+          type: string
+          nullable: true
+          example: "https://example.com/thumbnail.jpg"
+        score:
+          type: number
+          format: float
+          example: 45.67
+        published_at:
+          type: string
+          format: date-time
+          nullable: true
+        provider:
+          type: string
+          example: "provider1"
+
+    PaginationDTO:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        page_size:
+          type: integer
+          example: 20
+        total_items:
+          type: integer
+          format: int64
+          example: 150
+        total_pages:
+          type: integer
+          example: 8
+
+    SearchResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentSummaryDTO'
+        pagination:
+          $ref: '#/components/schemas/PaginationDTO'
+        error:
+          $ref: '#/components/schemas/ErrorResponse'
+
+    MetricsDTO:
+      type: object
+      properties:
+        views:
+          type: integer
+          format: int64
+          nullable: true
+          example: 15000
+        likes:
+          type: integer
+          format: int64
+          nullable: true
+          example: 1200
+        reading_time:
+          type: integer
+          nullable: true
+          example: 15
+        reactions:
+          type: integer
+          nullable: true
+          example: 25
+        recalculated_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    ContentDetailDTO:
+      allOf:
+        - $ref: '#/components/schemas/ContentSummaryDTO'
+        - type: object
+          properties:
+            metrics:
+              $ref: '#/components/schemas/MetricsDTO'
+
+    ContentDetailResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/ContentDetailDTO'
+        error:
+          $ref: '#/components/schemas/ErrorResponse'
+
+    StatsProviderDTO:
+      type: object
+      properties:
+        provider_id:
+          type: string
+          example: "provider1"
+        content_count:
+          type: integer
+          format: int64
+          example: 1250
+        last_sync:
+          type: string
+          format: date-time
+          nullable: true
+
+    StatsDTO:
+      type: object
+      properties:
+        total_contents:
+          type: integer
+          format: int64
+          example: 15420
+        total_videos:
+          type: integer
+          format: int64
+          example: 8920
+        total_texts:
+          type: integer
+          format: int64
+          example: 6500
+        average_score:
+          type: number
+          format: float
+          example: 42.85
+        last_sync:
+          type: string
+          format: date-time
+          nullable: true
+        providers:
+          type: array
+          items:
+            $ref: '#/components/schemas/StatsProviderDTO'
+
+    StatsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: '#/components/schemas/StatsDTO'
+
+    SyncResult:
+      type: object
+      properties:
+        provider_id:
+          type: string
+          example: "provider1"
+        status:
+          type: string
+          enum: [success, partial, failed]
+          example: "success"
+        total_fetched:
+          type: integer
+          example: 50
+        new_contents:
+          type: integer
+          example: 35
+        updated_contents:
+          type: integer
+          example: 12
+        skipped_contents:
+          type: integer
+          example: 3
+        failed_contents:
+          type: integer
+          example: 0
+        duration_ms:
+          type: integer
+          example: 1250
+
+    SyncHistoryEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 123
+        provider_id:
+          type: string
+          example: "provider1"
+        sync_status:
+          type: string
+          enum: [success, partial, failed, in_progress, skipped]
+          example: "success"
+        total_fetched:
+          type: integer
+          example: 50
+        new_contents:
+          type: integer
+          example: 35
+        updated_contents:
+          type: integer
+          example: 12
+        skipped_contents:
+          type: integer
+          example: 3
+        failed_contents:
+          type: integer
+          example: 0
+        error_message:
+          type: string
+          nullable: true
+          example: null
+        started_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        duration_ms:
+          type: integer
+          example: 1250
+
+    Job:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "sync-12345"
+        type:
+          type: string
+          example: "sync"
+        status:
+          type: string
+          enum: [pending, running, completed, failed]
+          example: "running"
+        progress:
+          type: integer
+          minimum: 0
+          maximum: 100
+          example: 45
+        message:
+          type: string
+          nullable: true
+          example: "Processing provider1"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+

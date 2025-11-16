@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+  test-db:
+    image: postgres:16-alpine
+    container_name: search_test_db
+    environment:
+      - POSTGRES_USER=testuser
+      - POSTGRES_PASSWORD=testpass
+      - POSTGRES_DB=testdb
+    ports:
+      - "5433:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U testuser -d testdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  test-redis:
+    image: redis:7-alpine
+    container_name: search_test_redis
+    ports:
+      - "6380:6379"
+    command: redis-server --appendonly yes
+    tmpfs:
+      - /data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  test-migrate:
+    image: migrate/migrate:4
+    container_name: search_test_migrate
+    command: ["-path", "/migrations", "-database", "postgres://testuser:testpass@test-db:5432/testdb?sslmode=disable", "up"]
+    volumes:
+      - ./backend/scripts/migrations:/migrations
+    depends_on:
+      test-db:
+        condition: service_healthy
