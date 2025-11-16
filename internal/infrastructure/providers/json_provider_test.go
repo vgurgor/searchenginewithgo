@@ -59,4 +59,16 @@ func TestJSONProvider_Timeout(t *testing.T) {
 	}
 }
 
+func TestJSONProvider_InvalidJSON(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"items":[{"id":`)) // malformed
+	}))
+	defer srv.Close()
+	p := NewJSONProvider(srv.URL, 2*time.Second)
+	if _, err := p.FetchContents(); err == nil {
+		t.Fatalf("expected error for invalid JSON")
+	}
+}
+
 

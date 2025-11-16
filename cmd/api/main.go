@@ -28,6 +28,8 @@ import (
 	_ "search_engine/docs"
 )
 
+var appStart = time.Now().UTC()
+
 func main() {
 	_ = godotenv.Load()
 
@@ -56,7 +58,11 @@ func main() {
 	router.Use(middleware.RequestLogger(log))
 	router.Use(middleware.ErrorHandler(log))
 
-	healthHandler := handlers.NewHealthHandler(dbPool, redisClient)
+	version := os.Getenv("APP_VERSION")
+	if version == "" {
+		version = "1.0.0"
+	}
+	healthHandler := handlers.NewHealthHandler(dbPool, redisClient, appStart, version)
 	router.GET("/health", healthHandler)
 
 	// Mock providers

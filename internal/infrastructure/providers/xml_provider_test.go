@@ -50,4 +50,16 @@ func TestXMLProvider_FetchContents(t *testing.T) {
 	}
 }
 
+func TestXMLProvider_Timeout(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(200 * time.Millisecond)
+		_, _ = w.Write([]byte(`<feed></feed>`))
+	}))
+	defer srv.Close()
+	p := NewXMLProvider(srv.URL, 50*time.Millisecond)
+	if _, err := p.FetchContents(); err == nil {
+		t.Fatalf("expected timeout")
+	}
+}
+
 

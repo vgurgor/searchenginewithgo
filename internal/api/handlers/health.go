@@ -10,18 +10,24 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func NewHealthHandler(db *pgxpool.Pool, redisClient *redis.Client) gin.HandlerFunc {
+func NewHealthHandler(db *pgxpool.Pool, redisClient *redis.Client, appStart time.Time, version string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx, cancel := context.WithTimeout(c.Request.Context(), 1*time.Second)
 		defer cancel()
 
 		dbOK := true
-		if err := db.Ping(ctx); err != nil {
+		t0 := time.Now()
+		dbErr := db.Ping(ctx)
+		dbLatency := time.Since(t0).Milliseconds()
+		if dbErr != nil {
 			dbOK = false
 		}
 
 		redisOK := true
-		if err := redisClient.Ping(ctx).Err(); err != nil {
+		t1 := time.Now()
+		rErr := redisClient.Ping(ctx).Err()
+		redisLatency := time.Since(t1).Milliseconds()
+		if rErr != nil {
 			redisOK = false
 		}
 
@@ -31,12 +37,29 @@ func NewHealthHandler(db *pgxpool.Pool, redisClient *redis.Client) gin.HandlerFu
 		}
 
 		c.JSON(status, gin.H{
-			"status":    "ok",
-			"postgres":  dbOK,
-			"redis":     redisOK,
+			"status":    "healthy",
 			"timestamp": time.Now().UTC(),
+			"version":   version,
+			"uptime_seconds": int(time.Since(appStart).Seconds()),
+			"services": gin.H{
+				"database": gin.H{
+					"status":            ternaryStatus(dbOK),
+					"response_time_ms":  dbLatency,
+				},
+				"redis": gin.H{
+					"status":            ternaryStatus(redisOK),
+					"response_time_ms":  redisLatency,
+				},
+			},
 		})
 	}
+}
+
+func ternaryStatus(ok bool) string {
+	if ok {
+		return "up"
+	}
+	return "down"
 }
 
 
