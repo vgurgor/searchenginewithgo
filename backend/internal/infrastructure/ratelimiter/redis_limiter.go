@@ -9,9 +9,9 @@ import (
 )
 
 type RedisLimiter struct {
-	Client        *redis.Client
-	Enabled       bool
-	Window        time.Duration
+	Client  *redis.Client
+	Enabled bool
+	Window  time.Duration
 }
 
 func NewRedisLimiter(client *redis.Client, enabled bool) *RedisLimiter {
@@ -56,5 +56,3 @@ func (r *RedisLimiter) RecordRequest(ctx context.Context, providerID string) err
 	_, err := pipe.Exec(ctx)
 	return err
 }
-
-

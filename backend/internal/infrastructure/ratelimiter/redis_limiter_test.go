@@ -51,5 +51,3 @@ func TestRedisLimiter_Disabled(t *testing.T) {
 		t.Fatalf("disabled limiter should pass, err=%v", err)
 	}
 }
-
-

@@ -9,31 +9,35 @@ import (
 	"testing"
 	"time"
 
+	"context"
 	"github.com/gin-gonic/gin"
-	"search_engine/internal/api/handlers"
 	"search_engine/internal/api/dto"
+	"search_engine/internal/api/handlers"
 	"search_engine/internal/domain/entities"
 	"search_engine/internal/domain/repositories"
 	"search_engine/internal/infrastructure/services"
-	"context"
 )
 
 // stubContentRepo implements repositories.ContentRepository with minimal behavior for search.
 type stubContentRepo struct{}
 
 func (s *stubContentRepo) Create(_ context.Context, _ *entities.Content) error { return nil }
-func (s *stubContentRepo) GetByID(_ context.Context, _ int64) (*entities.Content, error) { return nil, nil }
+func (s *stubContentRepo) GetByID(_ context.Context, _ int64) (*entities.Content, error) {
+	return nil, nil
+}
 func (s *stubContentRepo) GetAll(_ context.Context, _ repositories.ContentFilters, _ repositories.Pagination, _ repositories.SortBy) ([]entities.Content, int64, error) {
 	return nil, 0, nil
 }
-func (s *stubContentRepo) Update(_ context.Context, _ *entities.Content) error { return nil }
+func (s *stubContentRepo) Update(_ context.Context, _ *entities.Content) error      { return nil }
 func (s *stubContentRepo) BulkInsert(_ context.Context, _ []entities.Content) error { return nil }
 func (s *stubContentRepo) SearchByKeyword(_ context.Context, _ string, _ repositories.ContentFilters, _ repositories.Pagination, _ repositories.SortBy) ([]entities.Content, int64, error) {
 	return nil, 0, nil
 }
-func (s *stubContentRepo) GetByProviderKey(_ context.Context, _, _ string) (*entities.Content, error) { return nil, nil }
+func (s *stubContentRepo) GetByProviderKey(_ context.Context, _, _ string) (*entities.Content, error) {
+	return nil, nil
+}
 func (s *stubContentRepo) ListIDs(_ context.Context, _, _ int) ([]int64, error) { return nil, nil }
-func (s *stubContentRepo) CountAll(_ context.Context) (int64, error) { return 0, nil }
+func (s *stubContentRepo) CountAll(_ context.Context) (int64, error)            { return 0, nil }
 func (s *stubContentRepo) SearchWithFilters(_ context.Context, keyword string, contentType *entities.ContentType, pagination repositories.Pagination, sort repositories.SearchSort) ([]repositories.ContentWithMetrics, int64, error) {
 	// Return one predictable item
 	now := time.Now().UTC()
@@ -55,13 +59,23 @@ func (s *stubContentRepo) SearchWithFilters(_ context.Context, keyword string, c
 	}
 	return []repositories.ContentWithMetrics{item}, 1, nil
 }
-func (s *stubContentRepo) GetDetailByID(_ context.Context, _ int64) (*repositories.ContentWithMetrics, error) { return nil, nil }
-func (s *stubContentRepo) CountByType(_ context.Context) (map[entities.ContentType]int64, error) { return map[entities.ContentType]int64{}, nil }
+func (s *stubContentRepo) GetDetailByID(_ context.Context, _ int64) (*repositories.ContentWithMetrics, error) {
+	return nil, nil
+}
+func (s *stubContentRepo) CountByType(_ context.Context) (map[entities.ContentType]int64, error) {
+	return map[entities.ContentType]int64{}, nil
+}
 func (s *stubContentRepo) GetAverageScore(_ context.Context) (float64, error) { return 0, nil }
-func (s *stubContentRepo) CountByProvider(_ context.Context) (map[string]int64, error) { return map[string]int64{}, nil }
+func (s *stubContentRepo) CountByProvider(_ context.Context) (map[string]int64, error) {
+	return map[string]int64{}, nil
+}
 func (s *stubContentRepo) SoftDelete(_ context.Context, _ int64) error { return nil }
-func (s *stubContentRepo) ListIDsByType(_ context.Context, _ entities.ContentType, _, _ int) ([]int64, error) { return nil, nil }
-func (s *stubContentRepo) GetAverageScoreByProvider(_ context.Context, _ string) (float64, error) { return 0, nil }
+func (s *stubContentRepo) ListIDsByType(_ context.Context, _ entities.ContentType, _, _ int) ([]int64, error) {
+	return nil, nil
+}
+func (s *stubContentRepo) GetAverageScoreByProvider(_ context.Context, _ string) (float64, error) {
+	return 0, nil
+}
 
 func TestContentsSearchEndpoint(t *testing.T) {
 	gin.SetMode(gin.TestMode)
@@ -96,5 +110,3 @@ func TestContentsSearchEndpoint(t *testing.T) {
 		t.Fatalf("expected positive score, got %v", resp.Data[0].Score)
 	}
 }
-
-

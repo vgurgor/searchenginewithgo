@@ -26,5 +26,3 @@ type SyncHistory struct {
 	CompletedAt     *time.Time
 	DurationMs      int
 }
-
-

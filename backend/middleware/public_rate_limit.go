@@ -41,5 +41,3 @@ func PublicRateLimit(rdb *redis.Client, enabled bool, limit int, window time.Dur
 		c.Next()
 	}
 }
-
-

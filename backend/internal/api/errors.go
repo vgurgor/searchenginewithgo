@@ -27,10 +27,10 @@ const (
 	ErrCodeProviderError   ErrorCode = "PROVIDER_ERROR"
 
 	// System errors
-	ErrCodeInternalError   ErrorCode = "INTERNAL_ERROR"
-	ErrCodeDatabaseError   ErrorCode = "DATABASE_ERROR"
-	ErrCodeCacheError      ErrorCode = "CACHE_ERROR"
-	ErrCodeRateLimitError  ErrorCode = "RATE_LIMIT_EXCEEDED"
+	ErrCodeInternalError  ErrorCode = "INTERNAL_ERROR"
+	ErrCodeDatabaseError  ErrorCode = "DATABASE_ERROR"
+	ErrCodeCacheError     ErrorCode = "CACHE_ERROR"
+	ErrCodeRateLimitError ErrorCode = "RATE_LIMIT_EXCEEDED"
 
 	// Admin errors
 	ErrCodeAdminRequired ErrorCode = "ADMIN_ACCESS_REQUIRED"
@@ -39,11 +39,11 @@ const (
 
 // Error represents a structured API error
 type Error struct {
-	Code      ErrorCode           `json:"code"`
-	Message   string              `json:"message"`
-	Details   map[string]string   `json:"details,omitempty"`
-	RequestID string              `json:"request_id,omitempty"`
-	Timestamp string              `json:"timestamp,omitempty"`
+	Code      ErrorCode         `json:"code"`
+	Message   string            `json:"message"`
+	Details   map[string]string `json:"details,omitempty"`
+	RequestID string            `json:"request_id,omitempty"`
+	Timestamp string            `json:"timestamp,omitempty"`
 }
 
 // Error implements the error interface

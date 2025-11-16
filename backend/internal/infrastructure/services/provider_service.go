@@ -12,7 +12,7 @@ import (
 )
 
 type ProviderService struct {
-	Factory     interface {
+	Factory interface {
 		GetAllProviders() []domainp.IContentProvider
 		GetProviderByID(id string) (domainp.IContentProvider, error)
 	}
@@ -107,5 +107,3 @@ func (s *ProviderService) FetchFromProvider(ctx context.Context, providerID stri
 		return nil, cctx.Err()
 	}
 }
-
-

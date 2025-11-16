@@ -8,8 +8,8 @@ import (
 )
 
 type FreshnessConfig struct {
-	WithinOneWeekScore   float64
-	WithinOneMonthScore  float64
+	WithinOneWeekScore     float64
+	WithinOneMonthScore    float64
 	WithinThreeMonthsScore float64
 }
 
@@ -101,5 +101,3 @@ func maxInt(v int, min int) int {
 	}
 	return v
 }
-
-

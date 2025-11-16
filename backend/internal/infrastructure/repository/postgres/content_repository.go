@@ -593,5 +593,3 @@ func (r *contentRepository) searchWithFullText(ctx context.Context, keyword stri
 
 	return items, total, nil
 }
-
-

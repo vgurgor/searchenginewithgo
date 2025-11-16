@@ -10,16 +10,16 @@ import (
 )
 
 type ContentSyncJob struct {
-	Logger      *zap.Logger
-	Service     *services.ContentSyncService
-	Interval    time.Duration
-	Enabled     bool
-	MaxRetries  int
-	RetryDelay  time.Duration
+	Logger     *zap.Logger
+	Service    *services.ContentSyncService
+	Interval   time.Duration
+	Enabled    bool
+	MaxRetries int
+	RetryDelay time.Duration
 
-	mu       sync.Mutex
-	running  bool
-	stopCh   chan struct{}
+	mu      sync.Mutex
+	running bool
+	stopCh  chan struct{}
 }
 
 func NewContentSyncJob(logger *zap.Logger, svc *services.ContentSyncService, interval time.Duration, enabled bool, retries int, retryDelay time.Duration) *ContentSyncJob {
@@ -89,5 +89,3 @@ func (j *ContentSyncJob) runOnce() {
 		j.Logger.Error("content sync failed after retries", zap.Error(lastErr))
 	}
 }
-
-

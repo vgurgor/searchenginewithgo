@@ -60,5 +60,3 @@ func TestContentMetricsRepository_CRUD(t *testing.T) {
 		t.Fatalf("expected updated views 999 got %d", got2.Views)
 	}
 }
-
-

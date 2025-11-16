@@ -165,5 +165,3 @@ func (r *syncHistoryRepository) Count(ctx context.Context, providerID *string, s
 	}
 	return total, nil
 }
-
-

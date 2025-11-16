@@ -19,8 +19,8 @@ import (
 
 // TestEnvironment manages test database and redis connections
 type TestEnvironment struct {
-	DB    *pgxpool.Pool
-	Redis *redis.Client
+	DB      *pgxpool.Pool
+	Redis   *redis.Client
 	Cleanup func()
 }
 

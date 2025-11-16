@@ -25,5 +25,3 @@ type Content struct {
 	// Relation
 	Metrics *ContentMetrics `json:"metrics,omitempty"`
 }
-
-

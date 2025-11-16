@@ -15,14 +15,14 @@ type SearchFilters struct {
 }
 
 type ContentResponse struct {
-	ID          int64               `json:"id"`
-	Title       string              `json:"title"`
-	ContentType entities.ContentType`json:"contentType"`
-	Description *string             `json:"description,omitempty"`
-	URL         *string             `json:"url,omitempty"`
-	ThumbnailURL *string            `json:"thumbnailUrl,omitempty"`
-	Score       *float64            `json:"score,omitempty"`
-	PublishedAt *time.Time          `json:"publishedAt,omitempty"`
+	ID           int64                `json:"id"`
+	Title        string               `json:"title"`
+	ContentType  entities.ContentType `json:"contentType"`
+	Description  *string              `json:"description,omitempty"`
+	URL          *string              `json:"url,omitempty"`
+	ThumbnailURL *string              `json:"thumbnailUrl,omitempty"`
+	Score        *float64             `json:"score,omitempty"`
+	PublishedAt  *time.Time           `json:"publishedAt,omitempty"`
 }
 
 type PaginatedResponse[T any] struct {
@@ -32,5 +32,3 @@ type PaginatedResponse[T any] struct {
 	TotalCount int64 `json:"totalCount"`
 	TotalPages int   `json:"totalPages"`
 }
-
-

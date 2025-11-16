@@ -44,11 +44,11 @@ type xmlFeed struct {
 	Items   []xmlItem `xml:"items>item"`
 }
 type xmlItem struct {
-	ID      string    `xml:"id"`
+	ID       string   `xml:"id"`
 	Headline string   `xml:"headline"`
-	Type    string    `xml:"type"`
-	Stats   xmlStats  `xml:"stats"`
-	PubDate string    `xml:"publication_date"`
+	Type     string   `xml:"type"`
+	Stats    xmlStats `xml:"stats"`
+	PubDate  string   `xml:"publication_date"`
 }
 type xmlStats struct {
 	Views       *int64 `xml:"views"`
@@ -97,7 +97,7 @@ func (p *XMLProvider) FetchContents() ([]domainp.ProviderContent, error) {
 			ts = time.Now().UTC()
 		}
 		pc.PublishedAt = ts
-		
+
 		switch it.Type {
 		case "video":
 			pc.ContentType = "video"
@@ -118,5 +118,3 @@ func (p *XMLProvider) FetchContents() ([]domainp.ProviderContent, error) {
 	}
 	return out, nil
 }
-
-

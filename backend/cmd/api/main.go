@@ -4,31 +4,31 @@ import (
 	"context"
 	"net/http"
 	"os"
-	"time"
 	"strconv"
+	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"go.uber.org/zap"
 
+	_ "search_engine/docs"
 	"search_engine/internal/api"
 	"search_engine/internal/api/handlers"
 	"search_engine/internal/config"
+	"search_engine/internal/domain/scoring"
 	"search_engine/internal/infrastructure/cache"
 	"search_engine/internal/infrastructure/database"
+	"search_engine/internal/infrastructure/jobs"
 	infraproviders "search_engine/internal/infrastructure/providers"
 	"search_engine/internal/infrastructure/ratelimiter"
-	"search_engine/internal/infrastructure/services"
-	"search_engine/internal/infrastructure/jobs"
-	"search_engine/internal/domain/scoring"
 	"search_engine/internal/infrastructure/repository/postgres"
+	"search_engine/internal/infrastructure/services"
 	"search_engine/internal/middleware"
 	pubmw "search_engine/middleware"
 	"search_engine/pkg/logger"
-	_ "search_engine/docs"
 )
 
 var appStart = time.Now().UTC()
@@ -118,8 +118,8 @@ func main() {
 		VideoTypeMultiplier: videoMul,
 		TextTypeMultiplier:  textMul,
 		Freshness: scoring.FreshnessConfig{
-			WithinOneWeekScore:    fresh1w,
-			WithinOneMonthScore:   fresh1m,
+			WithinOneWeekScore:     fresh1w,
+			WithinOneMonthScore:    fresh1m,
 			WithinThreeMonthsScore: fresh3m,
 		},
 	}
@@ -144,14 +144,14 @@ func main() {
 	thAbsLikes, _ := strconv.Atoi(cfg.MetricsChangeThresholdAbsLikes)
 	thAbsReac, _ := strconv.Atoi(cfg.MetricsChangeThresholdAbsReactions)
 	syncSvc := &services.ContentSyncService{
-		Logger:      log,
-		Factory:     factory,
+		Logger:         log,
+		Factory:        factory,
 		ProviderClient: providerSvc,
-		Contents:    postgres.NewContentRepository(dbPool),
-		Metrics:     postgres.NewContentMetricsRepository(dbPool),
-		ScoreCalc:   scoreCalc,
-		HistoryRepo: postgres.NewSyncHistoryRepository(dbPool),
-		Thresholds:  services.MetricsThresholds{Percent: thPercent, AbsViews: thAbsViews, AbsLikes: thAbsLikes, AbsReactions: thAbsReac},
+		Contents:       postgres.NewContentRepository(dbPool),
+		Metrics:        postgres.NewContentMetricsRepository(dbPool),
+		ScoreCalc:      scoreCalc,
+		HistoryRepo:    postgres.NewSyncHistoryRepository(dbPool),
+		Thresholds:     services.MetricsThresholds{Percent: thPercent, AbsViews: thAbsViews, AbsLikes: thAbsLikes, AbsReactions: thAbsReac},
 	}
 	if cfg.ContentSyncEnabled == "true" {
 		syncEvery, _ := time.ParseDuration(cfg.ContentSyncInterval)
@@ -165,11 +165,11 @@ func main() {
 	// Admin API (secured)
 	jobMgr := jobs.NewJobManager()
 	adminHandlers := &handlers.AdminHandlers{
-		Logger: log,
-		Config: cfg,
-		SyncSvc: syncSvc,
+		Logger:    log,
+		Config:    cfg,
+		SyncSvc:   syncSvc,
 		ScoreCalc: scoreCalc,
-		JobMgr: jobMgr,
+		JobMgr:    jobMgr,
 	}
 	handlers.RegisterAdminRoutes(router, adminHandlers)
 
@@ -203,5 +203,3 @@ func main() {
 		log.Fatal("server error", zap.Error(err))
 	}
 }
-
-

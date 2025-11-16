@@ -68,5 +68,3 @@ func RegisterContentRoutes(router *gin.Engine, svc *services.ContentSearchServic
 		c.JSON(http.StatusOK, dto.StatsResponse{Success: true, Data: stats})
 	})
 }
-
-

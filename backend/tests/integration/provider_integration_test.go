@@ -81,7 +81,7 @@ func TestContentSyncFlow(t *testing.T) {
 func TestSearchWithRealData(t *testing.T) {
 	ctx := context.Background()
 	_ = ctx
-	
+
 	// This test would:
 	// 1. Ensure data is synced
 	// 2. Perform various search queries
@@ -107,4 +107,3 @@ func TestScoreCalculation(t *testing.T) {
 	// 3. Verify score matches expected formula
 	t.Skip("Score calculation test requires database setup")
 }
-

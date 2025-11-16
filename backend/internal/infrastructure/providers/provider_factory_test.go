@@ -15,5 +15,3 @@ func TestProviderFactory_RegisterAndGet(t *testing.T) {
 		t.Fatalf("expected 1 provider, got %d", len(all))
 	}
 }
-
-

@@ -3,7 +3,7 @@ package services
 import "testing"
 
 func TestHasMetricsChanged(t *testing.T) {
-	th := MetricsThresholds{Percent: 5, AbsViews: 100, AbsLikes:10, AbsReactions:5}
+	th := MetricsThresholds{Percent: 5, AbsViews: 100, AbsLikes: 10, AbsReactions: 5}
 	// No change
 	old := MetricsSnapshot{Views: 1000, Likes: 100, ReadingTime: 10, Reactions: 50}
 	newV := MetricsSnapshot{Views: 1000, Likes: 100, ReadingTime: 10, Reactions: 50}
@@ -34,5 +34,3 @@ func TestHasMetricsChanged(t *testing.T) {
 		t.Fatalf("expected change on reactions")
 	}
 }
-
-

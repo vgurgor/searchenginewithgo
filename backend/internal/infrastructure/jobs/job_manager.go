@@ -61,5 +61,3 @@ func (m *JobManager) Get(id string) (*JobInfo, bool) {
 	j, ok := m.jobs[id]
 	return j, ok
 }
-
-

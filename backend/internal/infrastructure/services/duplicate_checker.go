@@ -1,9 +1,9 @@
 package services
 
 type MetricsThresholds struct {
-	Percent int
-	AbsViews int
-	AbsLikes int
+	Percent      int
+	AbsViews     int
+	AbsLikes     int
 	AbsReactions int
 }
 
@@ -46,5 +46,3 @@ func significantChange(oldVal, newVal int64, percent int, abs int64) bool {
 	p := (float64(diff) / float64(oldVal)) * 100.0
 	return p >= float64(percent)
 }
-
-

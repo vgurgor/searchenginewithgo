@@ -84,5 +84,3 @@ func (r *contentMetricsRepository) BulkUpsert(ctx context.Context, metrics []ent
 	}
 	return nil
 }
-
-

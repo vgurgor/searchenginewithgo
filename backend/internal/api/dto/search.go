@@ -1,16 +1,16 @@
 package dto
 
 import (
-	"time"
 	"strings"
+	"time"
 )
 
 type SearchRequest struct {
-	Keyword    string
+	Keyword     string
 	ContentType string // "video" | "text" | ""
-	SortBy     string  // "score_desc" | "score_asc" | "date_desc" | "date_asc"
-	Page       int
-	PageSize   int
+	SortBy      string // "score_desc" | "score_asc" | "date_desc" | "date_asc"
+	Page        int
+	PageSize    int
 }
 
 func (r *SearchRequest) Normalize(defaultPage, defaultPageSize, maxPageSize int) {
@@ -52,10 +52,10 @@ type ContentSummaryDTO struct {
 }
 
 type MetricsDTO struct {
-	Views         *int64     `json:"views,omitempty"`
-	Likes         *int64     `json:"likes,omitempty"`
-	ReadingTime   *int       `json:"reading_time,omitempty"`
-	Reactions     *int       `json:"reactions,omitempty"`
+	Views          *int64     `json:"views,omitempty"`
+	Likes          *int64     `json:"likes,omitempty"`
+	ReadingTime    *int       `json:"reading_time,omitempty"`
+	Reactions      *int       `json:"reactions,omitempty"`
 	RecalculatedAt *time.Time `json:"recalculated_at,omitempty"`
 }
 
@@ -65,36 +65,34 @@ type ContentDetailDTO struct {
 }
 
 type SearchResponse struct {
-	Success    bool               `json:"success"`
-	Data       []ContentSummaryDTO`json:"data"`
-	Pagination PaginationDTO      `json:"pagination"`
-	Error      *ErrorDTO          `json:"error,omitempty"`
+	Success    bool                `json:"success"`
+	Data       []ContentSummaryDTO `json:"data"`
+	Pagination PaginationDTO       `json:"pagination"`
+	Error      *ErrorDTO           `json:"error,omitempty"`
 }
 
 type APIContentResponse struct {
-	Success bool             `json:"success"`
-	Data    *ContentDetailDTO`json:"data,omitempty"`
-	Error   *ErrorDTO        `json:"error,omitempty"`
+	Success bool              `json:"success"`
+	Data    *ContentDetailDTO `json:"data,omitempty"`
+	Error   *ErrorDTO         `json:"error,omitempty"`
 }
 
 type StatsProviderDTO struct {
-	ProviderID  string    `json:"provider_id"`
-	ContentCount int64    `json:"content_count"`
-	LastSync    *time.Time`json:"last_sync,omitempty"`
+	ProviderID   string     `json:"provider_id"`
+	ContentCount int64      `json:"content_count"`
+	LastSync     *time.Time `json:"last_sync,omitempty"`
 }
 
 type StatsDTO struct {
-	TotalContents int64             `json:"total_contents"`
-	TotalVideos   int64             `json:"total_videos"`
-	TotalTexts    int64             `json:"total_texts"`
-	AverageScore  float64           `json:"average_score"`
-	LastSync      *time.Time        `json:"last_sync,omitempty"`
-	Providers     []StatsProviderDTO`json:"providers"`
+	TotalContents int64              `json:"total_contents"`
+	TotalVideos   int64              `json:"total_videos"`
+	TotalTexts    int64              `json:"total_texts"`
+	AverageScore  float64            `json:"average_score"`
+	LastSync      *time.Time         `json:"last_sync,omitempty"`
+	Providers     []StatsProviderDTO `json:"providers"`
 }
 
 type StatsResponse struct {
 	Success bool     `json:"success"`
 	Data    StatsDTO `json:"data"`
 }
-
-

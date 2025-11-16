@@ -32,5 +32,3 @@ func (f *ProviderFactory) GetProviderByID(id string) (domainp.IContentProvider, 
 	}
 	return p, nil
 }
-
-

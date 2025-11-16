@@ -41,5 +41,3 @@ func GetJSON(ctx context.Context, rdb *redis.Client, key string, out any) (bool,
 	}
 	return true, nil
 }
-
-

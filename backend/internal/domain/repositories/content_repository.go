@@ -58,5 +58,3 @@ type ContentWithMetrics struct {
 	Content entities.Content
 	Metrics entities.ContentMetrics
 }
-
-

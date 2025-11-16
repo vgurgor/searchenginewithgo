@@ -12,8 +12,8 @@ func newEngine() *ScoringEngine {
 		VideoTypeMultiplier: 1.5,
 		TextTypeMultiplier:  1.0,
 		Freshness: FreshnessConfig{
-			WithinOneWeekScore:    5,
-			WithinOneMonthScore:   3,
+			WithinOneWeekScore:     5,
+			WithinOneMonthScore:    3,
 			WithinThreeMonthsScore: 1,
 		},
 	}
@@ -63,5 +63,3 @@ func TestVeryOldContentFreshnessZero(t *testing.T) {
 		t.Fatalf("expected 0 score for old content got %v", score)
 	}
 }
-
-

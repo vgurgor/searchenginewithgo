@@ -30,5 +30,3 @@ func ConnectPostgres(ctx context.Context, databaseURL string) (*pgxpool.Pool, er
 	}
 	return pool, nil
 }
-
-

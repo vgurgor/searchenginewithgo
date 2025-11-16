@@ -15,5 +15,3 @@ type SyncHistoryRepository interface {
 	List(ctx context.Context, providerID *string, status *entities.SyncStatus, limit, offset int) ([]entities.SyncHistory, error)
 	Count(ctx context.Context, providerID *string, status *entities.SyncStatus) (int64, error)
 }
-
-

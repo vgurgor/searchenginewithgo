@@ -13,12 +13,12 @@ import (
 )
 
 type HealthStatus struct {
-	Status        string                    `json:"status"`
-	Timestamp     time.Time                 `json:"timestamp"`
-	UptimeSeconds float64                   `json:"uptime_seconds"`
-	Version       string                    `json:"version"`
-	Services      map[string]ServiceHealth   `json:"services"`
-	System        SystemInfo                 `json:"system"`
+	Status        string                   `json:"status"`
+	Timestamp     time.Time                `json:"timestamp"`
+	UptimeSeconds float64                  `json:"uptime_seconds"`
+	Version       string                   `json:"version"`
+	Services      map[string]ServiceHealth `json:"services"`
+	System        SystemInfo               `json:"system"`
 }
 
 type ServiceHealth struct {
@@ -29,10 +29,10 @@ type ServiceHealth struct {
 }
 
 type SystemInfo struct {
-	GoVersion      string  `json:"go_version"`
-	NumGoroutines  int     `json:"num_goroutines"`
-	MemoryUsageMB  float64 `json:"memory_usage_mb"`
-	NumCPU         int     `json:"num_cpu"`
+	GoVersion     string  `json:"go_version"`
+	NumGoroutines int     `json:"num_goroutines"`
+	MemoryUsageMB float64 `json:"memory_usage_mb"`
+	NumCPU        int     `json:"num_cpu"`
 }
 
 func NewHealthHandler(db *pgxpool.Pool, redisClient *redis.Client, appStart time.Time, version string, logger *zap.Logger) gin.HandlerFunc {
@@ -133,10 +133,10 @@ func getSystemInfo() SystemInfo {
 	runtime.ReadMemStats(&m)
 
 	return SystemInfo{
-		GoVersion:      runtime.Version(),
-		NumGoroutines:  runtime.NumGoroutine(),
-		MemoryUsageMB:  float64(m.Alloc) / 1024 / 1024,
-		NumCPU:         runtime.NumCPU(),
+		GoVersion:     runtime.Version(),
+		NumGoroutines: runtime.NumGoroutine(),
+		MemoryUsageMB: float64(m.Alloc) / 1024 / 1024,
+		NumCPU:        runtime.NumCPU(),
 	}
 }
 
@@ -155,11 +155,11 @@ func DetailedMetricsHandler(db *pgxpool.Pool, redisClient *redis.Client, appStar
 		if db != nil {
 			stats := db.Stat()
 			metrics["database"] = gin.H{
-				"total_connections":     stats.TotalConns(),
-				"idle_connections":      stats.IdleConns(),
-				"acquired_connections":  stats.AcquiredConns(),
+				"total_connections":        stats.TotalConns(),
+				"idle_connections":         stats.IdleConns(),
+				"acquired_connections":     stats.AcquiredConns(),
 				"constructing_connections": stats.ConstructingConns(),
-				"new_connections_count": stats.NewConnsCount(),
+				"new_connections_count":    stats.NewConnsCount(),
 			}
 		}
 
@@ -182,5 +182,3 @@ func DetailedMetricsHandler(db *pgxpool.Pool, redisClient *redis.Client, appStar
 		c.JSON(http.StatusOK, metrics)
 	}
 }
-
-

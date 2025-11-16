@@ -78,7 +78,7 @@ func RegisterAdminRoutes(router *gin.Engine, h *AdminHandlers) {
 		}
 		var (
 			results any
-			err error
+			err     error
 		)
 		if body.ProviderID != nil && *body.ProviderID != "" {
 			r, e := h.SyncSvc.SyncProvider(c.Request.Context(), *body.ProviderID)
@@ -188,7 +188,7 @@ func RegisterAdminRoutes(router *gin.Engine, h *AdminHandlers) {
 			avg, _ := h.SyncSvc.Contents.GetAverageScoreByProvider(c.Request.Context(), pid)
 			last, _ := h.SyncSvc.HistoryRepo.GetLastSync(c.Request.Context(), pid)
 			entry := gin.H{
-				"provider_id": pid,
+				"provider_id":   pid,
 				"content_count": count,
 				"average_score": avg,
 			}
@@ -208,12 +208,12 @@ func RegisterAdminRoutes(router *gin.Engine, h *AdminHandlers) {
 		now := time.Now().UTC()
 		for pid := range byProvider {
 			out = append(out, gin.H{
-				"provider_id": pid,
-				"is_healthy": true,
+				"provider_id":      pid,
+				"is_healthy":       true,
 				"response_time_ms": 0,
-				"status_code": 200,
-				"checked_at": now,
-				"error": nil,
+				"status_code":      200,
+				"checked_at":       now,
+				"error":            nil,
 			})
 		}
 		c.JSON(http.StatusOK, gin.H{"success": true, "data": out})
@@ -240,14 +240,14 @@ func RegisterAdminRoutes(router *gin.Engine, h *AdminHandlers) {
 			"success": true,
 			"data": gin.H{
 				"overview": gin.H{
-					"total_contents": stats.TotalContents,
-					"total_videos": stats.TotalVideos,
-					"total_texts": stats.TotalTexts,
-					"average_score": stats.AverageScore,
+					"total_contents":  stats.TotalContents,
+					"total_videos":    stats.TotalVideos,
+					"total_texts":     stats.TotalTexts,
+					"average_score":   stats.AverageScore,
 					"providers_count": len(stats.Providers),
 				},
 				"sync_stats": gin.H{
-					"last_sync": stats.LastSync,
+					"last_sync":   stats.LastSync,
 					"total_syncs": totalSyncs,
 				},
 				"content_distribution": stats.Providers,
@@ -313,5 +313,3 @@ func recalcByType(ctx context.Context, svc *services.ScoreCalculatorService, ct 
 	}
 	return nil
 }
-
-

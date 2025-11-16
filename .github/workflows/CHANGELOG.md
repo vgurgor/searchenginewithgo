@@ -90,6 +90,8 @@ CODECOV_TOKEN - Codecov API token (codecov.io'dan alınır)
 - ✅ golangci-lint konfigürasyon validation hataları
 - ✅ "additional properties not allowed" hataları (.golangci.yml)
 - ✅ Deprecated linter kullanımları (golint, gomnd, maligned)
+- ✅ Go code formatting hataları (54 dosya gofmt ile formatlandı)
+- ✅ Import sıralaması ve kod stili iyileştirildi
 - ✅ Release workflow'unda asset upload sorunları
 
 ### 🚀 İyileştirmeler

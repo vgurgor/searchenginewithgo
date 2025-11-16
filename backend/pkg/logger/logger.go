@@ -1,8 +1,8 @@
 package logger
 
 import (
-	"strings"
 	"os"
+	"strings"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -41,5 +41,3 @@ func parseLevel(lvl string) zapcore.Level {
 		return zapcore.InfoLevel
 	}
 }
-
-

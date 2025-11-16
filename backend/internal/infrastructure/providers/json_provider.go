@@ -41,14 +41,14 @@ func (p *JSONProvider) GetRateLimit() domainp.RateLimit {
 
 type provider1Response struct {
 	Contents []struct {
-		ID          string    `json:"id"`
-		Title       string    `json:"title"`
-		Type        string    `json:"type"`
-		Metrics     struct {
-			Views    int64  `json:"views,omitempty"`
-			Likes    int64  `json:"likes,omitempty"`
-			Duration string `json:"duration,omitempty"`
-			Reactions int   `json:"reactions,omitempty"`
+		ID      string `json:"id"`
+		Title   string `json:"title"`
+		Type    string `json:"type"`
+		Metrics struct {
+			Views     int64  `json:"views,omitempty"`
+			Likes     int64  `json:"likes,omitempty"`
+			Duration  string `json:"duration,omitempty"`
+			Reactions int    `json:"reactions,omitempty"`
 		} `json:"metrics"`
 		PublishedAt time.Time `json:"published_at"`
 		Tags        []string  `json:"tags,omitempty"`
@@ -117,5 +117,3 @@ func (p *JSONProvider) FetchContents() ([]domainp.ProviderContent, error) {
 	}
 	return out, nil
 }
-
-

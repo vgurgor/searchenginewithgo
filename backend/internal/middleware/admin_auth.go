@@ -23,5 +23,3 @@ func AdminAuthMiddleware(enabled bool, apiKey string) gin.HandlerFunc {
 		c.Next()
 	}
 }
-
-

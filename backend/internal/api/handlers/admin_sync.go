@@ -39,5 +39,3 @@ func AdminSyncHandler(logger *zap.Logger, apiKey string, svc *services.ContentSy
 		c.JSON(http.StatusOK, gin.H{"success": err == nil, "results": []services.SyncResult{res}})
 	}
 }
-
-

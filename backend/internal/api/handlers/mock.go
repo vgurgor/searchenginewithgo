@@ -3,8 +3,8 @@ package handlers
 import (
 	"encoding/json"
 	"encoding/xml"
-	"os"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -39,10 +39,10 @@ type provider1Resp struct {
 // File-backed schema for provider1.json at repo root
 type provider1File struct {
 	Contents []struct {
-		ID          string `json:"id"`
-		Title       string `json:"title"`
-		Type        string `json:"type"`
-		Metrics     struct {
+		ID      string `json:"id"`
+		Title   string `json:"title"`
+		Type    string `json:"type"`
+		Metrics struct {
 			Views       int64  `json:"views"`
 			Likes       int64  `json:"likes"`
 			Duration    string `json:"duration,omitempty"`
@@ -61,7 +61,7 @@ type provider1File struct {
 func MockProvider1Handler(c *gin.Context) {
 	// File-only mode: require file, otherwise fail
 	fileOnly := os.Getenv("PROVIDERS_FILE_ONLY") == "true"
-	
+
 	// Try to serve from file if path is provided
 	if fp := os.Getenv("PROVIDER1_FILE_PATH"); fp != "" {
 		if f, err := os.Open(fp); err == nil {
@@ -74,7 +74,7 @@ func MockProvider1Handler(c *gin.Context) {
 			}
 		}
 	}
-	
+
 	if fileOnly {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
@@ -82,7 +82,7 @@ func MockProvider1Handler(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	// Fallback: Generate synthetic data in the new format
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
 	if limit <= 0 {
@@ -91,13 +91,13 @@ func MockProvider1Handler(c *gin.Context) {
 	if limit > 50 {
 		limit = 50
 	}
-	
+
 	now := time.Now().UTC()
 	contents := make([]struct {
-		ID          string    `json:"id"`
-		Title       string    `json:"title"`
-		Type        string    `json:"type"`
-		Metrics     struct {
+		ID      string `json:"id"`
+		Title   string `json:"title"`
+		Type    string `json:"type"`
+		Metrics struct {
 			Views     int64  `json:"views,omitempty"`
 			Likes     int64  `json:"likes,omitempty"`
 			Duration  string `json:"duration,omitempty"`
@@ -106,13 +106,13 @@ func MockProvider1Handler(c *gin.Context) {
 		PublishedAt time.Time `json:"published_at"`
 		Tags        []string  `json:"tags,omitempty"`
 	}, 0, limit)
-	
+
 	for i := 0; i < limit && i < 40; i++ {
 		item := struct {
-			ID          string    `json:"id"`
-			Title       string    `json:"title"`
-			Type        string    `json:"type"`
-			Metrics     struct {
+			ID      string `json:"id"`
+			Title   string `json:"title"`
+			Type    string `json:"type"`
+			Metrics struct {
 				Views     int64  `json:"views,omitempty"`
 				Likes     int64  `json:"likes,omitempty"`
 				Duration  string `json:"duration,omitempty"`
@@ -121,7 +121,7 @@ func MockProvider1Handler(c *gin.Context) {
 			PublishedAt time.Time `json:"published_at"`
 			Tags        []string  `json:"tags,omitempty"`
 		}{}
-		
+
 		if i%2 == 0 {
 			item.ID = "v" + strconv.Itoa(100+i)
 			item.Title = "Sample Video " + strconv.Itoa(i)
@@ -140,7 +140,7 @@ func MockProvider1Handler(c *gin.Context) {
 		item.PublishedAt = now.Add(-time.Duration(i) * 24 * time.Hour)
 		contents = append(contents, item)
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"contents": contents,
 		"pagination": gin.H{
@@ -178,10 +178,10 @@ type provider2File struct {
 	XMLName xml.Name `xml:"feed"`
 	Items   struct {
 		Item []struct {
-			ID              string `xml:"id"`
-			Headline        string `xml:"headline"`
-			Type            string `xml:"type"`
-			Stats           struct {
+			ID       string `xml:"id"`
+			Headline string `xml:"headline"`
+			Type     string `xml:"type"`
+			Stats    struct {
 				Views       *int64 `xml:"views"`
 				Likes       *int64 `xml:"likes"`
 				Duration    string `xml:"duration"`
@@ -202,7 +202,7 @@ type provider2File struct {
 func MockProvider2Handler(c *gin.Context) {
 	// File-only mode: require file, otherwise fail
 	fileOnly := os.Getenv("PROVIDERS_FILE_ONLY") == "true"
-	
+
 	// Try to serve from file if path is provided
 	if fp := os.Getenv("PROVIDER2_FILE_PATH"); fp != "" {
 		if f, err := os.Open(fp); err == nil {
@@ -216,13 +216,13 @@ func MockProvider2Handler(c *gin.Context) {
 			}
 		}
 	}
-	
+
 	if fileOnly {
 		c.Header("Content-Type", "application/xml; charset=utf-8")
 		c.String(http.StatusInternalServerError, `<error code="FILE_REQUIRED">PROVIDER2_FILE_PATH tanımlı değil veya dosya okunamadı</error>`)
 		return
 	}
-	
+
 	// Fallback: Generate synthetic data in the new format
 	size, _ := strconv.Atoi(c.DefaultQuery("size", "20"))
 	if size <= 0 {
@@ -231,13 +231,13 @@ func MockProvider2Handler(c *gin.Context) {
 	if size > 50 {
 		size = 50
 	}
-	
+
 	now := time.Now().UTC()
 	type xmlItem struct {
-		ID      string `xml:"id"`
+		ID       string `xml:"id"`
 		Headline string `xml:"headline"`
-		Type    string `xml:"type"`
-		Stats   struct {
+		Type     string `xml:"type"`
+		Stats    struct {
 			Views       *int64 `xml:"views,omitempty"`
 			Likes       *int64 `xml:"likes,omitempty"`
 			Duration    string `xml:"duration,omitempty"`
@@ -246,7 +246,7 @@ func MockProvider2Handler(c *gin.Context) {
 		} `xml:"stats"`
 		PublicationDate string `xml:"publication_date"`
 	}
-	
+
 	items := make([]xmlItem, 0, size)
 	for i := 0; i < size && i < 20; i++ {
 		item := xmlItem{}
@@ -271,9 +271,9 @@ func MockProvider2Handler(c *gin.Context) {
 		item.PublicationDate = now.Add(-time.Duration(i) * 24 * time.Hour).Format("2006-01-02")
 		items = append(items, item)
 	}
-	
+
 	type feed struct {
-		XMLName xml.Name  `xml:"feed"`
+		XMLName xml.Name `xml:"feed"`
 		Items   struct {
 			Item []xmlItem `xml:"item"`
 		} `xml:"items"`
@@ -283,15 +283,13 @@ func MockProvider2Handler(c *gin.Context) {
 			ItemsPerPage int `xml:"items_per_page"`
 		} `xml:"meta"`
 	}
-	
+
 	response := feed{}
 	response.Items.Item = items
 	response.Meta.TotalCount = 75
 	response.Meta.CurrentPage = 1
 	response.Meta.ItemsPerPage = size
-	
+
 	c.Header("Content-Type", "application/xml; charset=utf-8")
 	c.XML(http.StatusOK, response)
 }
-
-

@@ -6,8 +6,8 @@ import (
 
 	"go.uber.org/zap"
 
-	domainp "search_engine/internal/domain/providers"
 	"search_engine/internal/domain/entities"
+	domainp "search_engine/internal/domain/providers"
 	"search_engine/internal/domain/repositories"
 )
 
@@ -31,8 +31,8 @@ type IContentSyncService interface {
 }
 
 type ContentSyncService struct {
-	Logger      *zap.Logger
-	Factory     interface {
+	Logger  *zap.Logger
+	Factory interface {
 		GetAllProviders() []domainp.IContentProvider
 		GetProviderByID(id string) (domainp.IContentProvider, error)
 	}
@@ -193,5 +193,3 @@ func (s *ContentSyncService) persistHistory(ctx context.Context, h *entities.Syn
 		s.Logger.Warn("failed to persist sync history", zap.String("provider", h.ProviderID), zap.Error(err))
 	}
 }
-
-

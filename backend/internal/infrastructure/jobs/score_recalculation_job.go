@@ -75,5 +75,3 @@ func (j *ScoreRecalculationJob) runOnce() {
 	}
 	j.Logger.Info("recalculation batch completed", zap.Int64("processed", processed), zap.Duration("duration", time.Since(start)))
 }
-
-

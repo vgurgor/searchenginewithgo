@@ -34,5 +34,3 @@ func NewRedisClient(redisURL string) (*redis.Client, error) {
 	}
 	return redis.NewClient(opts), nil
 }
-
-

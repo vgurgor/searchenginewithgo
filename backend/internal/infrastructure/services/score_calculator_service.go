@@ -109,5 +109,3 @@ func valInt(p *int) int {
 	}
 	return *p
 }
-
-

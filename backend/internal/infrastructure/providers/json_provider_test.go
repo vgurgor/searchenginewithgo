@@ -15,15 +15,15 @@ func TestJSONProvider_FetchContents(t *testing.T) {
 			"contents": []map[string]any{
 				{
 					"id": "v1", "title": "Go Programming Tutorial", "type": "video",
-					"metrics": map[string]any{"views": 15000, "likes": 1200, "duration": "15:30"},
+					"metrics":      map[string]any{"views": 15000, "likes": 1200, "duration": "15:30"},
 					"published_at": "2024-03-15T10:00:00Z",
-					"tags": []string{"programming", "tutorial"},
+					"tags":         []string{"programming", "tutorial"},
 				},
 				{
 					"id": "a1", "title": "Clean Code Article", "type": "article",
-					"metrics": map[string]any{"reactions": 450},
+					"metrics":      map[string]any{"reactions": 450},
 					"published_at": "2024-03-14T14:30:00Z",
-					"tags": []string{"programming", "article"},
+					"tags":         []string{"programming", "article"},
 				},
 			},
 			"pagination": map[string]any{
@@ -77,6 +77,3 @@ func TestJSONProvider_InvalidJSON(t *testing.T) {
 		t.Fatalf("expected error for invalid JSON")
 	}
 }
-
-
-

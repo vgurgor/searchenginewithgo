@@ -29,5 +29,3 @@ func ErrorHandler(log *zap.Logger) gin.HandlerFunc {
 		}
 	}
 }
-
-

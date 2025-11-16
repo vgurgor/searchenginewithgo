@@ -27,5 +27,3 @@ func RequestLogger(log *zap.Logger) gin.HandlerFunc {
 		)
 	}
 }
-
-

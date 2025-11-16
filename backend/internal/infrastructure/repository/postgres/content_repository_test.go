@@ -94,5 +94,3 @@ func TestContentRepository_CRUD(t *testing.T) {
 		t.Fatalf("expected search results")
 	}
 }
-
-

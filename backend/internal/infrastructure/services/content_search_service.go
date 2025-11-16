@@ -17,14 +17,14 @@ import (
 )
 
 type ContentSearchService struct {
-	Repo         repositories.ContentRepository
-	HistoryRepo  repositories.SyncHistoryRepository
+	Repo            repositories.ContentRepository
+	HistoryRepo     repositories.SyncHistoryRepository
 	DefaultPageSize int
 	MaxPageSize     int
 	// Optional cache
-	CacheClient   *redis.Client
-	CacheEnabled  bool
-	CacheTTL      time.Duration
+	CacheClient  *redis.Client
+	CacheEnabled bool
+	CacheTTL     time.Duration
 }
 
 func (s *ContentSearchService) SearchContents(ctx context.Context, req dto.SearchRequest) ([]dto.ContentSummaryDTO, int64, error) {
@@ -83,15 +83,15 @@ func (s *ContentSearchService) SearchContents(ctx context.Context, req dto.Searc
 		desc := truncateOrNil(row.Content.Description, 200)
 		score := row.Metrics.FinalScore
 		out = append(out, dto.ContentSummaryDTO{
-			ID:          row.Content.ID,
-			Title:       row.Content.Title,
-			ContentType: string(row.Content.ContentType),
-			Description: desc,
-			URL:         row.Content.URL,
+			ID:           row.Content.ID,
+			Title:        row.Content.Title,
+			ContentType:  string(row.Content.ContentType),
+			Description:  desc,
+			URL:          row.Content.URL,
 			ThumbnailURL: row.Content.ThumbnailURL,
-			Score:       score,
-			PublishedAt: row.Content.PublishedAt,
-			Provider:    row.Content.ProviderID,
+			Score:        score,
+			PublishedAt:  row.Content.PublishedAt,
+			Provider:     row.Content.ProviderID,
 		})
 	}
 	if s.CacheEnabled && s.CacheClient != nil && s.CacheTTL > 0 {
@@ -142,21 +142,21 @@ func (s *ContentSearchService) GetContentByID(ctx context.Context, id int64) (*d
 	desc := row.Content.Description
 	result := &dto.ContentDetailDTO{
 		ContentSummaryDTO: dto.ContentSummaryDTO{
-			ID:          row.Content.ID,
-			Title:       row.Content.Title,
-			ContentType: string(row.Content.ContentType),
-			Description: desc,
-			URL:         row.Content.URL,
+			ID:           row.Content.ID,
+			Title:        row.Content.Title,
+			ContentType:  string(row.Content.ContentType),
+			Description:  desc,
+			URL:          row.Content.URL,
 			ThumbnailURL: row.Content.ThumbnailURL,
-			Score:       row.Metrics.FinalScore,
-			PublishedAt: row.Content.PublishedAt,
-			Provider:    row.Content.ProviderID,
+			Score:        row.Metrics.FinalScore,
+			PublishedAt:  row.Content.PublishedAt,
+			Provider:     row.Content.ProviderID,
 		},
 		Metrics: dto.MetricsDTO{
-			Views: viewsPtr,
-			Likes: likesPtr,
-			ReadingTime: rtPtr,
-			Reactions: reacPtr,
+			Views:          viewsPtr,
+			Likes:          likesPtr,
+			ReadingTime:    rtPtr,
+			Reactions:      reacPtr,
 			RecalculatedAt: row.Metrics.RecalculatedAt,
 		},
 	}
@@ -274,4 +274,3 @@ func truncateOrNil(s *string, max int) *string {
 func round2(v float64) float64 {
 	return math.Round(v*100) / 100
 }
-

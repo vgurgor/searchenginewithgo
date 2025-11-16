@@ -12,5 +12,3 @@ type ContentMetricsRepository interface {
 	GetByContentID(ctx context.Context, contentID int64) (*entities.ContentMetrics, error)
 	BulkUpsert(ctx context.Context, metrics []entities.ContentMetrics) error
 }
-
-

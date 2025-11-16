@@ -26,5 +26,3 @@ type IContentProvider interface {
 	GetProviderID() string
 	GetRateLimit() RateLimit
 }
-
-
