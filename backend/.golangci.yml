@@ -1,12 +1,15 @@
 linters-settings:
   dupl:
     threshold: 100
+  
   funlen:
     lines: 100
     statements: 50
+  
   goconst:
     min-len: 2
     min-occurrences: 2
+  
   gocritic:
     enabled-tags:
       - diagnostic
@@ -20,18 +23,24 @@ linters-settings:
       - octalLiteral
       - whyNoLint
       - wrapperFunc
+  
   gocyclo:
     min-complexity: 15
+  
   goimports:
     local-prefixes: github.com/golangci/golangci-lint
-  golint:
-    min-confidence: 0
-  gomnd:
-    settings:
-      mnd:
-        checks: argument,case,condition,return
+  
+  # gomnd yerine mnd kullanılıyor (golangci-lint v1.52+)
+  mnd:
+    checks:
+      - argument
+      - case
+      - condition
+      - return
+  
   govet:
-    check-shadowing: true
+    enable:
+      - shadow  # check-shadowing yerine shadow linter'ı aktif
     settings:
       printf:
         funcs:
@@ -39,17 +48,21 @@ linters-settings:
           - (github.com/golangci/golangci-lint/pkg/logutils.Log).Warnf
           - (github.com/golangci/golangci-lint/pkg/logutils.Log).Errorf
           - (github.com/golangci/golangci-lint/pkg/logutils.Log).Fatalf
+  
   lll:
     line-length: 140
-  maligned:
-    suggest-new: true
+  
   misspell:
     locale: US
+  
   nolintlint:
-    allow-leading-space: true
     allow-unused: false
     require-explanation: false
     require-specific: false
+  
+  revive:
+    # golint yerine revive kullanılıyor
+    confidence: 0.8
 
 linters:
   disable-all: true
@@ -66,7 +79,7 @@ linters:
     - gocyclo
     - gofmt
     - goimports
-    - gomnd
+    - mnd              # gomnd yerine mnd
     - goprintffuncname
     - gosec
     - gosimple
@@ -77,6 +90,7 @@ linters:
     - nakedret
     - noctx
     - nolintlint
+    - revive           # golint yerine revive
     - staticcheck
     - stylecheck
     - typecheck
@@ -84,20 +98,32 @@ linters:
     - unparam
     - unused
     - whitespace
+    # maligned deprecated, fieldalignment kullanılıyor (govet içinde)
 
 issues:
+  # Yeni format: exclude-dirs ve exclude-files
+  exclude-dirs:
+    - vendor
+    - tmp
+  
+  exclude-files:
+    - ".*_generated\\.go$"
+  
   exclude-rules:
     - path: _test\.go
       linters:
-        - gomnd
+        - mnd
         - funlen
         - dupl
+    
     - linters:
         - lll
       source: "^//go:generate "
+    
     - linters:
         - staticcheck
       text: "SA9003:"
+    
     - linters:
         - stylecheck
       text: "ST1000:"
@@ -108,9 +134,4 @@ issues:
 
 run:
   timeout: 5m
-  skip-dirs:
-    - vendor
-    - tmp
-  skip-files:
-    - ".*_generated.go$"
-
+  # skip-dirs ve skip-files kaldırıldı, issues.exclude-dirs/files kullanılıyor

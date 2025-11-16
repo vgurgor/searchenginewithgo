@@ -29,8 +29,15 @@
    - Sebep: Bug fixes ve iyileştirmeler
 
 6. **golangci/golangci-lint-action**: v3 → v6
-   - Dosyalar: `ci.yml`
+   - Dosyalar: `ci.yml`, `backend/.golangci.yml`
    - Sebep: v3 eski, v6 en son stable versiyon
+   - Değişiklikler:
+     - `golint` → `revive` (golint deprecated)
+     - `gomnd` → `mnd` (yeni isim)
+     - `maligned` → kaldırıldı (deprecated)
+     - `govet.check-shadowing` → `govet.enable: [shadow]`
+     - `nolintlint.allow-leading-space` → kaldırıldı
+     - `run.skip-dirs/skip-files` → `issues.exclude-dirs/exclude-files`
 
 7. **actions/dependency-review-action**: v3 → v4
    - Dosyalar: `pr-check.yml`
@@ -80,6 +87,9 @@ CODECOV_TOKEN - Codecov API token (codecov.io'dan alınır)
 - ✅ "deprecated version of actions/upload-release-asset: v1" hatası
 - ✅ "CodeQL Action v3 will be deprecated" uyarısı
 - ✅ "Resource not accessible by integration" permission hatası
+- ✅ golangci-lint konfigürasyon validation hataları
+- ✅ "additional properties not allowed" hataları (.golangci.yml)
+- ✅ Deprecated linter kullanımları (golint, gomnd, maligned)
 - ✅ Release workflow'unda asset upload sorunları
 
 ### 🚀 İyileştirmeler
