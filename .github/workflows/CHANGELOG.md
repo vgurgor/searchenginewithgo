@@ -102,6 +102,8 @@ CODECOV_TOKEN - Codecov API token (codecov.io'dan alınır)
 - ✅ Go version uyumsuzluğu (CI: 1.21 vs go.mod: 1.22)
 - ✅ Test panic: nil pointer dereference (`content_sync_service_test.go`)
 - ✅ Test'te nil logger kullanımı (ScoreCalculatorService)
+- ✅ Docker build: grpc-gateway v2.27.3 Go 1.24.0 gerektirme hatası
+- ✅ Dependency version uyumsuzluğu
 - ✅ Release workflow'unda asset upload sorunları
 
 ### 📦 Go Module ve Version Güncellemeleri
@@ -119,8 +121,9 @@ CODECOV_TOKEN - Codecov API token (codecov.io'dan alınır)
 
 **Güncellenen Dependencies:**
 - `redis/go-redis/v9` v9.5.1 → v9.7.3
+- `grpc-ecosystem/grpc-gateway/v2` v2.27.3 → v2.22.0 (Go 1.22 uyumluluğu için downgrade)
 
-**Not:** `go mod tidy` çalıştırıldı ve tüm eksik dependencies eklendi. Go version 1.22'de sabitlendi (Dockerfile uyumu için).
+**Not:** `go mod tidy` çalıştırıldı ve tüm eksik dependencies eklendi. Go version 1.22'de sabitlendi (Dockerfile uyumu için). grpc-gateway v2.27.3, Go 1.24.0 gerektirdiği için v2.22.0'a downgrade edildi.
 
 ### 🚀 İyileştirmeler
 
