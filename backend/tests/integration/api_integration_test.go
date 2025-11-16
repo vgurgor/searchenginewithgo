@@ -28,7 +28,7 @@ func TestHealthEndpoint(t *testing.T) {
 	defer env.Cleanup()
 
 	// Create health handler
-	healthHandler := handlers.NewHealthHandler(env.DB, env.Redis, time.Now(), "1.0.0-test")
+	healthHandler := handlers.NewHealthHandler(env.DB, env.Redis, time.Now(), "1.0.0-test", env.Logger)
 
 	// Create router
 	router := gin.New()

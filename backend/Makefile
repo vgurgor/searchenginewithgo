@@ -1,4 +1,4 @@
-.PHONY: help build test run clean migrate-up migrate-down seed docker-up docker-down docker-logs test-integration test-coverage test-unit lint fmt deps swagger test-env-up test-env-down check-go-version fix-go-version
+.PHONY: help build test run clean migrate-up migrate-down migrate-test seed docker-up docker-down docker-logs test-integration test-coverage test-unit lint fmt deps swagger test-env-up test-env-down check-go-version fix-go-version
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
@@ -44,6 +44,9 @@ migrate-up: ## Run database migrations
 
 migrate-down: ## Rollback database migrations
 	docker compose run --rm migrate down
+
+migrate-test: ## Run migrations for test environment (handled by testcontainers)
+	@echo "✅ Test migrations are handled by testcontainers in integration tests"
 
 seed: ## Seed database with test data
 	bash scripts/seed.sh

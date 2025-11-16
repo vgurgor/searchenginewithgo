@@ -15,12 +15,14 @@ import (
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	rediscontainer "github.com/testcontainers/testcontainers-go/modules/redis"
 	"github.com/testcontainers/testcontainers-go/wait"
+	"go.uber.org/zap"
 )
 
 // TestEnvironment manages test database and redis connections
 type TestEnvironment struct {
 	DB      *pgxpool.Pool
 	Redis   *redis.Client
+	Logger  *zap.Logger
 	Cleanup func()
 }
 
@@ -106,17 +108,25 @@ func SetupTestEnvironment(t *testing.T) *TestEnvironment {
 		t.Fatalf("Failed to run migrations: %v", err)
 	}
 
+	// Create test logger
+	logger, err := zap.NewDevelopment()
+	if err != nil {
+		t.Fatalf("Failed to create logger: %v", err)
+	}
+
 	cleanup := func() {
 		for i := len(cleanupFuncs) - 1; i >= 0; i-- {
 			cleanupFuncs[i]()
 		}
 		dbPool.Close()
 		rdb.Close()
+		logger.Sync()
 	}
 
 	return &TestEnvironment{
 		DB:      dbPool,
 		Redis:   rdb,
+		Logger:  logger,
 		Cleanup: cleanup,
 	}
 }
