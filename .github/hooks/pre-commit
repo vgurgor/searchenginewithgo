@@ -1,0 +1,33 @@
+#!/bin/bash
+# Pre-commit hook to check Go version in go.mod
+
+echo "🔍 Checking Go version in go.mod..."
+
+cd backend 2>/dev/null || cd ../backend 2>/dev/null || {
+    echo "⚠️ Could not find backend directory"
+    exit 0
+}
+
+if grep -q "^go 1.24" go.mod; then
+    echo ""
+    echo "❌ ERROR: go.mod has Go 1.24.0!"
+    echo ""
+    echo "This will break Docker build because:"
+    echo "  - Go 1.24.0 is not released yet"
+    echo "  - Dockerfile uses golang:1.22-alpine"
+    echo "  - CI uses GO_VERSION: '1.22'"
+    echo ""
+    echo "Please change backend/go.mod to:"
+    echo "  go 1.22"
+    echo ""
+    echo "Quick fix:"
+    echo "  cd backend && make fix-go-version"
+    echo ""
+    echo "See backend/GO_VERSION.md for details"
+    echo ""
+    exit 1
+fi
+
+echo "✅ Go version is correct (1.22)"
+exit 0
+

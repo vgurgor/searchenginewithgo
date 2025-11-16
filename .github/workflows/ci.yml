@@ -11,9 +11,34 @@ env:
   NODE_VERSION: '20'
 
 jobs:
+  check-go-version:
+    name: Verify Go Version
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Check go.mod version
+        run: |
+          cd backend
+          if grep -q "^go 1.24" go.mod; then
+            echo "❌ ERROR: go.mod has Go 1.24.0 which is not released yet!"
+            echo ""
+            echo "Dockerfile uses golang:1.22-alpine"
+            echo "CI uses GO_VERSION: '1.22'"
+            echo ""
+            echo "Please change backend/go.mod to: go 1.22"
+            echo "See backend/GO_VERSION.md for details"
+            exit 1
+          else
+            echo "✅ go.mod Go version is correct (1.22)"
+          fi
+
   backend-test:
     name: Backend Tests
     runs-on: ubuntu-latest
+    needs: check-go-version
     
     services:
       postgres:
@@ -111,6 +136,7 @@ jobs:
   backend-lint:
     name: Backend Linting
     runs-on: ubuntu-latest
+    needs: check-go-version
     
     steps:
       - name: Checkout code
@@ -178,7 +204,7 @@ jobs:
   docker-build:
     name: Docker Build
     runs-on: ubuntu-latest
-    needs: [backend-test, frontend-test]
+    needs: [check-go-version, backend-test, frontend-test]
     
     steps:
       - name: Checkout code

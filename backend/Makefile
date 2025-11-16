@@ -1,4 +1,4 @@
-.PHONY: help build test run clean migrate-up migrate-down seed docker-up docker-down docker-logs test-integration test-coverage test-unit lint fmt deps swagger test-env-up test-env-down
+.PHONY: help build test run clean migrate-up migrate-down seed docker-up docker-down docker-logs test-integration test-coverage test-unit lint fmt deps swagger test-env-up test-env-down check-go-version fix-go-version
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
@@ -63,6 +63,28 @@ deps: ## Download dependencies
 
 swagger: ## Generate Swagger docs (requires swag)
 	swag init -g cmd/api/main.go -o docs
+
+check-go-version: ## Check if go.mod has correct Go version (1.22)
+	@if grep -q "^go 1.24" go.mod; then \
+		echo "❌ ERROR: go.mod has Go 1.24.0 which is not released yet!"; \
+		echo ""; \
+		echo "Dockerfile uses golang:1.22-alpine"; \
+		echo "Please change go.mod to: go 1.22"; \
+		echo ""; \
+		echo "Run: make fix-go-version"; \
+		exit 1; \
+	else \
+		echo "✅ go.mod Go version is correct (1.22)"; \
+	fi
+
+fix-go-version: ## Fix go.mod to use Go 1.22
+	@echo "Fixing go.mod to use Go 1.22..."
+	@sed -i.bak 's/^go 1\.24\..*/go 1.22/' go.mod
+	@rm -f go.mod.bak
+	@go mod tidy
+	@echo "✅ Fixed! go.mod now uses Go 1.22"
+	@echo ""
+	@grep "^go " go.mod
 
 .DEFAULT_GOAL := help
 

@@ -1,6 +1,9 @@
+// IMPORTANT: Keep go version at 1.22 for Dockerfile compatibility
+// DO NOT change to 1.24.0 - it's not released yet and will break Docker build
+// See backend/GO_VERSION.md for details
 module search_engine
 
-go 1.24.0
+go 1.22
 
 require (
 	github.com/gin-contrib/cors v1.5.0

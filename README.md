@@ -45,6 +45,18 @@ Final Skor = (Temel Puan × İçerik Türü Katsayısı) + Güncellik Puanı + E
 ## Hızlı Başlangıç (Geliştirme)
 Önkoşullar: Docker ve Docker Compose
 
+**⚠️ ÖNEMLİ: Go Version Kontrolü**
+```bash
+# Git hooks'u yükleyin (önerilir - Go version hatalarını önler)
+make install-hooks
+
+# Veya manuel kontrol
+make check-go-version
+
+# Eğer Go version yanlışsa düzeltin
+make fix-go-version
+```
+
 1) Ortam değişkenlerini oluşturun:
 ```
 cp backend/env.example backend/.env
@@ -67,11 +79,14 @@ make migrate
 
 Yardımcı komutlar:
 ```
-make logs        # Tüm servis logları
-make api-logs    # API logları
-make fe-logs     # Frontend logları
-make down        # Servisleri durdur
-make seed        # Örnek verilerle doldur
+make logs             # Tüm servis logları
+make api-logs         # API logları
+make fe-logs          # Frontend logları
+make down             # Servisleri durdur
+make seed             # Örnek verilerle doldur
+make check-go-version # Go version kontrolü
+make fix-go-version   # Go version'ı 1.22'ye düzelt
+make install-hooks    # Git hooks'u yükle
 ```
 
 ### Test Çalıştırma
