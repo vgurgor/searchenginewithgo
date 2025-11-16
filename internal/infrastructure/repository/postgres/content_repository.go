@@ -263,4 +263,141 @@ func (r *contentRepository) CountAll(ctx context.Context) (int64, error) {
 	return total, nil
 }
 
+func (r *contentRepository) SearchWithFilters(ctx context.Context, keyword string, contentType *entities.ContentType, pagination repositories.Pagination, sort repositories.SearchSort) ([]repositories.ContentWithMetrics, int64, error) {
+	where := "WHERE 1=1"
+	args := []any{}
+	arg := 1
+	if keyword != "" {
+		where += " AND (LOWER(c.title) LIKE $%d OR LOWER(COALESCE(c.description,'')) LIKE $%d)"
+		k := "%" + strings.ToLower(keyword) + "%"
+		where = fmt.Sprintf(where, arg, arg+1)
+		args = append(args, k, k)
+		arg += 2
+	}
+	if contentType != nil {
+		where += fmt.Sprintf(" AND c.content_type = $%d", arg)
+		args = append(args, *contentType)
+		arg++
+	}
+	countSQL := "SELECT COUNT(*) FROM contents c INNER JOIN content_metrics cm ON cm.content_id = c.id " + where
+	var total int64
+	if err := r.pool.QueryRow(ctx, countSQL, args...).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+	order := "ORDER BY cm.final_score DESC NULLS LAST"
+	switch sort {
+	case repositories.SearchSortScoreAsc:
+		order = "ORDER BY cm.final_score ASC NULLS LAST"
+	case repositories.SearchSortDateDesc:
+		order = "ORDER BY c.published_at DESC NULLS LAST"
+	case repositories.SearchSortDateAsc:
+		order = "ORDER BY c.published_at ASC NULLS LAST"
+	}
+	if pagination.Page <= 0 {
+		pagination.Page = 1
+	}
+	if pagination.PageSize <= 0 || pagination.PageSize > 100 {
+		pagination.PageSize = 20
+	}
+	offset := (pagination.Page - 1) * pagination.PageSize
+	sql := `
+		SELECT 
+			c.id, c.provider_id, c.provider_content_id, c.title, c.content_type, c.description, c.url, c.thumbnail_url, c.published_at, c.created_at, c.updated_at,
+			cm.id, cm.content_id, cm.views, cm.likes, cm.reading_time, cm.reactions, cm.final_score, cm.recalculated_at, cm.created_at, cm.updated_at
+		FROM contents c
+		INNER JOIN content_metrics cm ON cm.content_id = c.id
+	` + where + `
+	` + order + `
+	LIMIT $%d OFFSET $%d
+	`
+	sql = fmt.Sprintf(sql, arg, arg+1)
+	args = append(args, pagination.PageSize, offset)
+	rows, err := r.pool.Query(ctx, sql, args...)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+	var out []repositories.ContentWithMetrics
+	for rows.Next() {
+		var c entities.Content
+		var m entities.ContentMetrics
+		if err := rows.Scan(
+			&c.ID, &c.ProviderID, &c.ProviderContentID, &c.Title, &c.ContentType, &c.Description, &c.URL, &c.ThumbnailURL, &c.PublishedAt, &c.CreatedAt, &c.UpdatedAt,
+			&m.ID, &m.ContentID, &m.Views, &m.Likes, &m.ReadingTime, &m.Reactions, &m.FinalScore, &m.RecalculatedAt, &m.CreatedAt, &m.UpdatedAt,
+		); err != nil {
+			return nil, 0, err
+		}
+		out = append(out, repositories.ContentWithMetrics{Content: c, Metrics: m})
+	}
+	if rows.Err() != nil {
+		return nil, 0, rows.Err()
+	}
+	return out, total, nil
+}
+
+func (r *contentRepository) GetDetailByID(ctx context.Context, id int64) (*repositories.ContentWithMetrics, error) {
+	const q = `
+		SELECT 
+			c.id, c.provider_id, c.provider_content_id, c.title, c.content_type, c.description, c.url, c.thumbnail_url, c.published_at, c.created_at, c.updated_at,
+			cm.id, cm.content_id, cm.views, cm.likes, cm.reading_time, cm.reactions, cm.final_score, cm.recalculated_at, cm.created_at, cm.updated_at
+		FROM contents c
+		INNER JOIN content_metrics cm ON cm.content_id = c.id
+		WHERE c.id=$1
+	`
+	var c entities.Content
+	var m entities.ContentMetrics
+	if err := r.pool.QueryRow(ctx, q, id).Scan(
+		&c.ID, &c.ProviderID, &c.ProviderContentID, &c.Title, &c.ContentType, &c.Description, &c.URL, &c.ThumbnailURL, &c.PublishedAt, &c.CreatedAt, &c.UpdatedAt,
+		&m.ID, &m.ContentID, &m.Views, &m.Likes, &m.ReadingTime, &m.Reactions, &m.FinalScore, &m.RecalculatedAt, &m.CreatedAt, &m.UpdatedAt,
+	); err != nil {
+		return nil, err
+	}
+	res := repositories.ContentWithMetrics{Content: c, Metrics: m}
+	return &res, nil
+}
+
+func (r *contentRepository) CountByType(ctx context.Context) (map[entities.ContentType]int64, error) {
+	rows, err := r.pool.Query(ctx, `SELECT content_type, COUNT(*) FROM contents GROUP BY content_type`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	res := make(map[entities.ContentType]int64)
+	for rows.Next() {
+		var t entities.ContentType
+		var cnt int64
+		if err := rows.Scan(&t, &cnt); err != nil {
+			return nil, err
+		}
+		res[t] = cnt
+	}
+	return res, rows.Err()
+}
+
+func (r *contentRepository) GetAverageScore(ctx context.Context) (float64, error) {
+	var avg float64
+	if err := r.pool.QueryRow(ctx, `SELECT COALESCE(AVG(final_score),0) FROM content_metrics`).Scan(&avg); err != nil {
+		return 0, err
+	}
+	return avg, nil
+}
+
+func (r *contentRepository) CountByProvider(ctx context.Context) (map[string]int64, error) {
+	rows, err := r.pool.Query(ctx, `SELECT provider_id, COUNT(*) FROM contents GROUP BY provider_id`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	res := make(map[string]int64)
+	for rows.Next() {
+		var pid string
+		var cnt int64
+		if err := rows.Scan(&pid, &cnt); err != nil {
+			return nil, err
+		}
+		res[pid] = cnt
+	}
+	return res, rows.Err()
+}
+
 

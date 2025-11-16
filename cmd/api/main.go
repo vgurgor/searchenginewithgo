@@ -138,6 +138,17 @@ func main() {
 	// Admin manual sync endpoint (API key)
 	router.POST("/api/admin/sync", handlers.AdminSyncHandler(log, cfg.AdminAPIKey, syncSvc))
 
+	// Content search endpoints
+	defPage, _ := strconv.Atoi(cfg.DefaultPageSize)
+	maxPage, _ := strconv.Atoi(cfg.MaxPageSize)
+	searchSvc := &services.ContentSearchService{
+		Repo:            postgres.NewContentRepository(dbPool),
+		HistoryRepo:     postgres.NewSyncHistoryRepository(dbPool),
+		DefaultPageSize: defPage,
+		MaxPageSize:     maxPage,
+	}
+	handlers.RegisterContentRoutes(router, searchSvc, defPage, maxPage)
+
 	addr := ":" + cfg.APIPort
 	if port := os.Getenv("PORT"); port != "" {
 		addr = ":" + port

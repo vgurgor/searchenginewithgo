@@ -32,6 +32,9 @@ type Config struct {
 	MetricsChangeThresholdAbsLikes string
 	MetricsChangeThresholdAbsReactions string
 	AdminAPIKey string
+	// API pagination
+	DefaultPageSize string
+	MaxPageSize     string
 }
 
 func Load() Config {
@@ -61,6 +64,8 @@ func Load() Config {
 		MetricsChangeThresholdAbsLikes: getenv("METRICS_CHANGE_THRESHOLD_ABS_LIKES", "10"),
 		MetricsChangeThresholdAbsReactions: getenv("METRICS_CHANGE_THRESHOLD_ABS_REACTIONS", "5"),
 		AdminAPIKey: getenv("ADMIN_API_KEY", ""),
+		DefaultPageSize: getenv("DEFAULT_PAGE_SIZE", "20"),
+		MaxPageSize: getenv("MAX_PAGE_SIZE", "100"),
 	}
 	return cfg
 }

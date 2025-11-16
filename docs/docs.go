@@ -12,7 +12,43 @@ var doc = `{
   },
   "host": "localhost:8080",
   "basePath": "/",
-  "paths": {},
+  "paths": {
+    "/api/v1/contents/search": {
+      "get": {
+        "summary": "Search contents",
+        "parameters": [
+          { "name":"q","in":"query","type":"string","required":false },
+          { "name":"type","in":"query","type":"string","enum":["video","text"],"required":false },
+          { "name":"sort","in":"query","type":"string","enum":["score_desc","score_asc","date_desc","date_asc"],"required":false },
+          { "name":"page","in":"query","type":"integer","required":false },
+          { "name":"page_size","in":"query","type":"integer","required":false }
+        ],
+        "responses": {
+          "200": { "description":"OK" }
+        }
+      }
+    },
+    "/api/v1/contents/{id}": {
+      "get": {
+        "summary":"Get content by ID",
+        "parameters":[
+          {"name":"id","in":"path","type":"integer","required":true}
+        ],
+        "responses": {
+          "200": { "description":"OK" },
+          "404": { "description":"Not Found" }
+        }
+      }
+    },
+    "/api/v1/contents/stats": {
+      "get": {
+        "summary":"Get contents statistics",
+        "responses": {
+          "200": { "description":"OK" }
+        }
+      }
+    }
+  },
   "definitions": {
     "Content": {
       "type": "object",
