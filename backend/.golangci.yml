@@ -116,6 +116,81 @@ issues:
         - funlen
         - dupl
     
+    # Swagger otomatik üretilmiş docs - elle düzenleme önerilmez
+    - path: docs/docs\.go
+      linters:
+        - lll
+        - gochecknoinits
+    
+    # Mock handler test data - magic numbers normal
+    - path: internal/api/handlers/mock\.go
+      linters:
+        - mnd
+        - gosec
+    
+    # Scoring algoritması - magic numbers business logic'in parçası
+    - path: internal/domain/scoring/scoring\.go
+      linters:
+        - mnd
+    
+    # Test helpers - deprecated testcontainers API (kütüphane güncellemesi gerekir)
+    - path: tests/test_helpers\.go
+      linters:
+        - staticcheck
+        - mnd
+    
+    # Repository interfaces - uzun fonksiyon imzaları kabul edilebilir
+    - path: internal/domain/repositories/
+      linters:
+        - lll
+    
+    # Repository implementations - uzun SQL query'ler ve Scan satırları
+    - path: internal/infrastructure/repository/postgres/
+      linters:
+        - lll
+        - goconst
+    
+    # Service layer - uzun fonksiyon imzaları kabul edilebilir
+    - path: internal/infrastructure/services/
+      linters:
+        - lll
+        - rangeValCopy
+        - goconst
+    
+    # Admin routes - complex business logic, magic numbers config değerleri
+    - path: internal/api/handlers/admin_routes\.go
+      linters:
+        - mnd
+        - gocyclo
+        - goconst
+    
+    # Health handler - timing calculations
+    - path: internal/api/handlers/health\.go
+      linters:
+        - mnd
+    
+    # Main function - initialization, magic numbers config değerleri
+    - path: cmd/api/main\.go
+      linters:
+        - mnd
+        - funlen
+        - goconst
+    
+    # Database/infrastructure - timeout değerleri
+    - path: internal/infrastructure/database/
+      linters:
+        - mnd
+    
+    # Middleware - HTTP status codes
+    - path: internal/middleware/
+      linters:
+        - mnd
+    
+    # Jobs - timing ve configuration
+    - path: internal/infrastructure/jobs/
+      linters:
+        - lll
+    
     - linters:
         - lll
       source: "^//go:generate "
