@@ -109,7 +109,7 @@ func (s *ContentSearchService) GetContentByID(ctx context.Context, id int64) (*d
 	// Try cache first if enabled
 	if s.CacheEnabled && s.CacheClient != nil {
 		var cached dto.ContentDetailDTO
-		if err := cache.GetJSON(s.CacheClient, cacheKey, &cached); err == nil {
+		if ok, _ := cache.GetJSON(ctx, s.CacheClient, cacheKey, &cached); ok {
 			return &cached, nil
 		}
 	}
@@ -163,14 +163,14 @@ func (s *ContentSearchService) GetContentByID(ctx context.Context, id int64) (*d
 
 	// Cache the result if enabled
 	if s.CacheEnabled && s.CacheClient != nil {
-		cache.SetJSON(s.CacheClient, cacheKey, result, s.CacheTTL)
+		_ = cache.SetJSON(ctx, s.CacheClient, cacheKey, result, s.CacheTTL)
 	}
 
 	return result, nil
 }
 
 // InvalidateContentCache clears the cache for a specific content item
-func (s *ContentSearchService) InvalidateContentCache(id int64) error {
+func (s *ContentSearchService) InvalidateContentCache(ctx context.Context, id int64) error {
 	if !s.CacheEnabled || s.CacheClient == nil {
 		return nil
 	}
@@ -180,7 +180,7 @@ func (s *ContentSearchService) InvalidateContentCache(id int64) error {
 }
 
 // InvalidateSearchCache clears search result caches (pattern-based invalidation)
-func (s *ContentSearchService) InvalidateSearchCache() error {
+func (s *ContentSearchService) InvalidateSearchCache(ctx context.Context) error {
 	if !s.CacheEnabled || s.CacheClient == nil {
 		return nil
 	}

@@ -19,49 +19,19 @@ func RegisterContentRoutes(router *gin.Engine, svc *services.ContentSearchServic
 		sort := strings.TrimSpace(c.Query("sort"))
 		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
-<<<<<<< Current (Your changes)
-	req := dto.SearchRequest{
-		Keyword: q, ContentType: ct, SortBy: sort, Page: page, PageSize: pageSize,
-	}
-	req.Normalize(1, defaultPageSize, maxPageSize)
-	if req.PageSize < 1 || req.PageSize > maxPageSize {
-		api.SendError(c, api.ErrInvalidParameter("page_size", "must be between 1 and 100"))
-		return
-	}
-	items, total, err := svc.SearchContents(c.Request.Context(), req)
-	if err != nil {
-		api.SendError(c, api.ErrInvalidParameter("search_query", err.Error()))
-		return
-	}
-=======
 		req := dto.SearchRequest{
 			Keyword: q, ContentType: ct, SortBy: sort, Page: page, PageSize: pageSize,
 		}
 		req.Normalize(1, defaultPageSize, maxPageSize)
 		if req.PageSize < 1 || req.PageSize > maxPageSize {
-			c.JSON(http.StatusBadRequest, dto.SearchResponse{
-				Success: false,
-				Error:   &dto.ErrorDTO{Code: "INVALID_PARAMETER", Message: "page_size must be between 1 and 100"},
-			})
+			api.SendError(c, api.ErrInvalidParameter("page_size", "must be between 1 and 100"))
 			return
 		}
 		items, total, err := svc.SearchContents(c.Request.Context(), req)
 		if err != nil {
-			status := http.StatusInternalServerError
-			errResp := &dto.ErrorDTO{Code: "INTERNAL_ERROR", Message: "internal server error"}
-			if strings.Contains(strings.ToLower(err.Error()), "invalid content type") {
-				status = http.StatusBadRequest
-				errResp = &dto.ErrorDTO{Code: "INVALID_PARAMETER", Message: err.Error()}
-			} else {
-				_ = c.Error(err)
-			}
-			c.JSON(status, dto.SearchResponse{
-				Success: false,
-				Error:   errResp,
-			})
+			api.SendError(c, api.ErrInvalidParameter("search_query", err.Error()))
 			return
 		}
->>>>>>> Incoming (Background Agent changes)
 		totalPages := int((total + int64(req.PageSize) - 1) / int64(req.PageSize))
 		c.JSON(http.StatusOK, dto.SearchResponse{
 			Success: true,
