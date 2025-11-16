@@ -92,9 +92,14 @@ CODECOV_TOKEN - Codecov API token (codecov.io'dan alınır)
 - ✅ Deprecated linter kullanımları (golint, gomnd, maligned)
 - ✅ Go code formatting hataları (54 dosya gofmt ile formatlandı)
 - ✅ Import sıralaması ve kod stili iyileştirildi
+- ✅ Go version uyumsuzluğu (1.24.0 → 1.22, Dockerfile ile uyumlu)
+- ✅ Docker build "go.mod requires go >= 1.24.0" hatası
 - ✅ Release workflow'unda asset upload sorunları
 
 ### 📦 Go Module Güncellemeleri
+
+**Go Version:**
+- `go 1.22` (Dockerfile ile uyumlu)
 
 **Eklenen Test Dependencies:**
 - `testcontainers/testcontainers-go` v0.40.0
@@ -105,7 +110,7 @@ CODECOV_TOKEN - Codecov API token (codecov.io'dan alınır)
 **Güncellenen Dependencies:**
 - `redis/go-redis/v9` v9.5.1 → v9.7.3
 
-**Not:** `go mod tidy` çalıştırıldı ve tüm eksik dependencies eklendi.
+**Not:** `go mod tidy` çalıştırıldı ve tüm eksik dependencies eklendi. Go version 1.22'de sabitlendi (Dockerfile uyumu için).
 
 ### 🚀 İyileştirmeler
 
