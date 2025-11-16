@@ -1,0 +1,58 @@
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: .
+      target: dev
+    container_name: search_api
+    ports:
+      - "${API_PORT:-8080}:8080"
+    env_file:
+      - .env
+    volumes:
+      - ./:/app
+      - go_pkg:/go/pkg/mod
+      - go_build:/root/.cache/go-build
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:16-alpine
+    container_name: search_db
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-searchdb}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: search_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  migrate:
+    image: migrate/migrate:4
+    container_name: search_migrate
+    command: ["-path", "/migrations", "-database", "${DATABASE_URL}", "up"]
+    volumes:
+      - ./scripts/migrations:/migrations
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+volumes:
+  db_data:
+  redis_data:
+  go_pkg:
+  go_build:
+
+

@@ -1,0 +1,10 @@
+bin/
+tmp/
+dist/
+build/
+coverage/
+vendor/
+.DS_Store
+.env
+
+
