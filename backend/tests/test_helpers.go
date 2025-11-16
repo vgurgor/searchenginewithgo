@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -82,6 +83,9 @@ func SetupTestEnvironment(t *testing.T) *TestEnvironment {
 		t.Fatalf("Failed to get Redis connection string: %v", err)
 	}
 
+	// Remove redis:// prefix if present
+	redisAddr := strings.TrimPrefix(redisConnStr, "redis://")
+
 	// Connect to PostgreSQL
 	dbPool, err := pgxpool.New(ctx, pgConnStr)
 	if err != nil {
@@ -95,7 +99,7 @@ func SetupTestEnvironment(t *testing.T) *TestEnvironment {
 
 	// Connect to Redis
 	rdb := redis.NewClient(&redis.Options{
-		Addr: redisConnStr,
+		Addr: redisAddr,
 	})
 
 	// Test Redis connection
