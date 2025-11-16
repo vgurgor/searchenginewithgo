@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -19,6 +20,9 @@ import (
 	infraproviders "search_engine/internal/infrastructure/providers"
 	"search_engine/internal/infrastructure/ratelimiter"
 	"search_engine/internal/infrastructure/services"
+	"search_engine/internal/infrastructure/jobs"
+	"search_engine/internal/domain/scoring"
+	"search_engine/internal/infrastructure/repository/postgres"
 	"search_engine/internal/middleware"
 	"search_engine/pkg/logger"
 	_ "search_engine/docs"
@@ -75,6 +79,37 @@ func main() {
 		Limiter: rateLimiter,
 		Logger:  log,
 		Timeout: providerTimeout,
+	}
+
+	// Scoring services wiring
+	// Parse scoring configs
+	videoMul, _ := strconv.ParseFloat(cfg.VideoTypeMultiplier, 64)
+	textMul, _ := strconv.ParseFloat(cfg.TextTypeMultiplier, 64)
+	fresh1w, _ := strconv.ParseFloat(cfg.Freshness1Week, 64)
+	fresh1m, _ := strconv.ParseFloat(cfg.Freshness1Month, 64)
+	fresh3m, _ := strconv.ParseFloat(cfg.Freshness3Months, 64)
+	engine := &scoring.ScoringEngine{
+		VideoTypeMultiplier: videoMul,
+		TextTypeMultiplier:  textMul,
+		Freshness: scoring.FreshnessConfig{
+			WithinOneWeekScore:    fresh1w,
+			WithinOneMonthScore:   fresh1m,
+			WithinThreeMonthsScore: fresh3m,
+		},
+	}
+	scoreCalc := &services.ScoreCalculatorService{
+		Contents: postgres.NewContentRepository(dbPool),
+		Metrics:  postgres.NewContentMetricsRepository(dbPool),
+		Engine:   engine,
+		Logger:   log,
+	}
+	// Optional background job
+	if cfg.ScoreRecalcEnabled == "true" {
+		recalcEvery, _ := time.ParseDuration(cfg.ScoreRecalcInterval)
+		batchSize, _ := strconv.Atoi(cfg.ScoreBatchSize)
+		job := jobs.NewScoreRecalculationJob(log, postgres.NewContentRepository(dbPool), scoreCalc, batchSize, recalcEvery)
+		job.Start()
+		defer job.Stop()
 	}
 
 	addr := ":" + cfg.APIPort

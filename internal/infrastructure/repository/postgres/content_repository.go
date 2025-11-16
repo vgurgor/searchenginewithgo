@@ -221,4 +221,46 @@ func (r *contentRepository) SearchByKeyword(ctx context.Context, keyword string,
 	return items, total, nil
 }
 
+func (r *contentRepository) GetByProviderKey(ctx context.Context, providerID, providerContentID string) (*entities.Content, error) {
+	const q = `
+		SELECT id, provider_id, provider_content_id, title, content_type, description, url, thumbnail_url, published_at, created_at, updated_at
+		FROM contents WHERE provider_id=$1 AND provider_content_id=$2
+	`
+	var c entities.Content
+	if err := r.pool.QueryRow(ctx, q, providerID, providerContentID).Scan(
+		&c.ID, &c.ProviderID, &c.ProviderContentID, &c.Title, &c.ContentType, &c.Description, &c.URL, &c.ThumbnailURL, &c.PublishedAt, &c.CreatedAt, &c.UpdatedAt,
+	); err != nil {
+		return nil, err
+	}
+	return &c, nil
+}
+
+func (r *contentRepository) ListIDs(ctx context.Context, offset, limit int) ([]int64, error) {
+	rows, err := r.pool.Query(ctx, `SELECT id FROM contents ORDER BY id LIMIT $1 OFFSET $2`, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var ids []int64
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	if rows.Err() != nil {
+		return nil, rows.Err()
+	}
+	return ids, nil
+}
+
+func (r *contentRepository) CountAll(ctx context.Context) (int64, error) {
+	var total int64
+	if err := r.pool.QueryRow(ctx, `SELECT COUNT(*) FROM contents`).Scan(&total); err != nil {
+		return 0, err
+	}
+	return total, nil
+}
+
 

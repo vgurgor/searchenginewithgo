@@ -30,6 +30,10 @@ type ContentRepository interface {
 	Update(ctx context.Context, c *entities.Content) error
 	BulkInsert(ctx context.Context, contents []entities.Content) error
 	SearchByKeyword(ctx context.Context, keyword string, filters ContentFilters, pagination Pagination, sort SortBy) ([]entities.Content, int64, error)
+	// Extended
+	GetByProviderKey(ctx context.Context, providerID, providerContentID string) (*entities.Content, error)
+	ListIDs(ctx context.Context, offset, limit int) ([]int64, error)
+	CountAll(ctx context.Context) (int64, error)
 }
 
 
