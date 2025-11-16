@@ -100,6 +100,8 @@ CODECOV_TOKEN - Codecov API token (codecov.io'dan alınır)
 - ✅ golangci-lint "no go files to analyze" hatası
 - ✅ backend-lint job'unda eksik dependency download
 - ✅ Go version uyumsuzluğu (CI: 1.21 vs go.mod: 1.22)
+- ✅ Test panic: nil pointer dereference (`content_sync_service_test.go`)
+- ✅ Test'te nil logger kullanımı (ScoreCalculatorService)
 - ✅ Release workflow'unda asset upload sorunları
 
 ### 📦 Go Module ve Version Güncellemeleri

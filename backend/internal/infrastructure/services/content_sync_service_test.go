@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"go.uber.org/zap"
+
 	"search_engine/internal/domain/entities"
 	"search_engine/internal/domain/providers"
 	"search_engine/internal/domain/repositories"
@@ -168,6 +170,7 @@ func (n *noopHistoryRepo) Count(ctx context.Context, providerID *string, status 
 }
 
 func TestContentSyncService_NewAndUpdate(t *testing.T) {
+	logger := zap.NewNop() // Use no-op logger for tests
 	now := time.Now().UTC()
 	items := []providers.ProviderContent{
 		{ProviderID: "provider1", ProviderContentID: "a1", Title: "T1", ContentType: "text", PublishedAt: now},
@@ -177,10 +180,10 @@ func TestContentSyncService_NewAndUpdate(t *testing.T) {
 	crepo := &memContentRepo{}
 	mrepo := &memMetricsRepo{}
 	engine := &mockEngine{}
-	scoreCalc := &ScoreCalculatorService{Contents: crepo, Metrics: mrepo, Engine: engine}
+	scoreCalc := &ScoreCalculatorService{Contents: crepo, Metrics: mrepo, Engine: engine, Logger: logger}
 	providerClient := &fakeProviderClient{items: items}
 	svc := &ContentSyncService{
-		Logger:         nil,
+		Logger:         logger,
 		Factory:        factory,
 		ProviderClient: providerClient,
 		Contents:       crepo,
