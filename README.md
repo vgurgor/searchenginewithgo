@@ -18,6 +18,15 @@
 - PostgreSQL: `localhost:5432`
 - Redis: `localhost:6379`
 
+### Provider Mock API'leri
+- JSON Provider (Provider1): `GET /mock/provider1/contents?limit=20&offset=0`
+- XML Provider (Provider2): `GET /mock/provider2/feed?page=1&size=20`
+- ENV:
+  - `PROVIDER1_BASE_URL=http://localhost:8080/mock/provider1`
+  - `PROVIDER2_BASE_URL=http://localhost:8080/mock/provider2`
+  - `PROVIDER_TIMEOUT=10s`
+  - `RATE_LIMIT_ENABLED=true`
+
 ### Docker Compose
 - Hot-reload: `api` servisi `air` ile çalışır, volume mapping aktiftir.
 - Persistans: PostgreSQL için `db_data` volume tanımlıdır.

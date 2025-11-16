@@ -16,6 +16,9 @@ import (
 	"search_engine/internal/config"
 	"search_engine/internal/infrastructure/cache"
 	"search_engine/internal/infrastructure/database"
+	infraproviders "search_engine/internal/infrastructure/providers"
+	"search_engine/internal/infrastructure/ratelimiter"
+	"search_engine/internal/infrastructure/services"
 	"search_engine/internal/middleware"
 	"search_engine/pkg/logger"
 	_ "search_engine/docs"
@@ -52,8 +55,27 @@ func main() {
 	healthHandler := handlers.NewHealthHandler(dbPool, redisClient)
 	router.GET("/health", healthHandler)
 
+	// Mock providers
+	router.GET("/mock/provider1/contents", handlers.MockProvider1Handler)
+	router.GET("/mock/provider2/feed", handlers.MockProvider2Handler)
+
 	// Swagger UI served by gin-swagger at /swagger/index.html
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(files.Handler))
+
+	// Provider factory and service wiring (for use in future endpoints/jobs)
+	providerTimeout, _ := time.ParseDuration(cfg.ProviderTimeout)
+	factory := infraproviders.NewProviderFactory()
+	jsonProvider := infraproviders.NewJSONProvider(cfg.Provider1BaseURL, providerTimeout)
+	xmlProvider := infraproviders.NewXMLProvider(cfg.Provider2BaseURL, providerTimeout)
+	factory.RegisterProvider(jsonProvider)
+	factory.RegisterProvider(xmlProvider)
+	rateLimiter := ratelimiter.NewRedisLimiter(redisClient, cfg.RateLimitEnabled == "true")
+	_ = services.ProviderService{
+		Factory: factory,
+		Limiter: rateLimiter,
+		Logger:  log,
+		Timeout: providerTimeout,
+	}
 
 	addr := ":" + cfg.APIPort
 	if port := os.Getenv("PORT"); port != "" {
