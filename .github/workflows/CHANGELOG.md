@@ -19,20 +19,29 @@
    - Değişiklik: Token parametresi eklendi (v4 gereksinimi)
    - Gerekli secret: `CODECOV_TOKEN`
 
-4. **github/codeql-action/upload-sarif**: v2 → v3
+4. **github/codeql-action/upload-sarif**: v2 → v4
    - Dosyalar: `ci.yml`
-   - Sebep: v2 deprecated
+   - Sebep: v2 ve v3 deprecated (v3, December 2026'da kaldırılacak)
+   - Eklenen: `security-events: write` permission
 
 5. **appleboy/ssh-action**: v1.0.0 → v1.0.3
    - Dosyalar: `deploy.yml`
    - Sebep: Bug fixes ve iyileştirmeler
 
-6. **actions/create-release**: v1 → KALDIRILDI
+6. **golangci/golangci-lint-action**: v3 → v6
+   - Dosyalar: `ci.yml`
+   - Sebep: v3 eski, v6 en son stable versiyon
+
+7. **actions/dependency-review-action**: v3 → v4
+   - Dosyalar: `pr-check.yml`
+   - Sebep: v4 daha fazla özellik ve iyileştirme
+
+8. **actions/create-release**: v1 → KALDIRILDI
    - Dosyalar: `release.yml`
    - Alternatif: `softprops/action-gh-release@v1`
    - Sebep: v1 deprecated ve artık desteklenmiyor
 
-7. **actions/upload-release-asset**: v1 → KALDIRILDI
+9. **actions/upload-release-asset**: v1 → KALDIRILDI
    - Dosyalar: `release.yml`
    - Alternatif: `softprops/action-gh-release@v1` (asset upload dahil)
    - Sebep: v1 deprecated
@@ -69,6 +78,8 @@ CODECOV_TOKEN - Codecov API token (codecov.io'dan alınır)
 - ✅ "deprecated version of actions/upload-artifact: v3" hatası
 - ✅ "deprecated version of actions/create-release: v1" hatası
 - ✅ "deprecated version of actions/upload-release-asset: v1" hatası
+- ✅ "CodeQL Action v3 will be deprecated" uyarısı
+- ✅ "Resource not accessible by integration" permission hatası
 - ✅ Release workflow'unda asset upload sorunları
 
 ### 🚀 İyileştirmeler
@@ -77,17 +88,31 @@ CODECOV_TOKEN - Codecov API token (codecov.io'dan alınır)
 2. **Daha İyi Release Yönetimi**: `softprops/action-gh-release` daha esnek ve özellik zengin
 3. **Otomatik Changelog**: Git commit'lerinden otomatik changelog oluşturma
 4. **GitHub Release Notes**: Otomatik release notes oluşturma aktif
+5. **Security Scanning İyileştirildi**: CodeQL v4 + doğru permission'lar
 
 ### ⚠️ Breaking Changes
 
 **YOK** - Tüm değişiklikler backward compatible
 
+### 🔐 Permission Güncellemeleri
+
+**Security Scanning Job:**
+```yaml
+permissions:
+  contents: read
+  security-events: write
+```
+
+Bu permission'lar olmadan CodeQL SARIF upload başarısız olur.
+
 ### 📚 Referanslar
 
 - [GitHub Blog: Artifact Actions v3 Deprecation](https://github.blog/changelog/2024-04-16-deprecation-notice-v3-of-the-artifact-actions/)
+- [GitHub Blog: CodeQL Action v3 Deprecation](https://github.blog/changelog/2025-10-28-upcoming-deprecation-of-codeql-action-v3/)
 - [actions/upload-artifact v4 Migration Guide](https://github.com/actions/upload-artifact/blob/main/docs/MIGRATION.md)
 - [Codecov Action v4 Documentation](https://github.com/codecov/codecov-action)
 - [softprops/action-gh-release](https://github.com/softprops/action-gh-release)
+- [GitHub Permissions Documentation](https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs)
 
 ---
 
