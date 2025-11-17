@@ -27,7 +27,7 @@ jobs:
           go list -u -m all | grep '\[' >> $GITHUB_STEP_SUMMARY || echo "All Go dependencies up to date" >> $GITHUB_STEP_SUMMARY
       
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
       
