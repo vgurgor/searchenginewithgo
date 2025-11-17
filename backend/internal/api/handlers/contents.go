@@ -20,7 +20,7 @@ func RegisterContentRoutes(router *gin.Engine, svc *services.ContentSearchServic
 		sort := strings.TrimSpace(c.Query("sort"))
 		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
-		
+
 		// Validate page_size BEFORE creating request
 		if pageSizeQuery := c.Query("page_size"); pageSizeQuery != "" {
 			if pageSize < 1 || pageSize > maxPageSize {
@@ -28,7 +28,7 @@ func RegisterContentRoutes(router *gin.Engine, svc *services.ContentSearchServic
 				return
 			}
 		}
-		
+
 		req := dto.SearchRequest{
 			Keyword: q, ContentType: ct, SortBy: sort, Page: page, PageSize: pageSize,
 		}
