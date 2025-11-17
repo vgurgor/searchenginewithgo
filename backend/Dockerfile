@@ -22,7 +22,7 @@ EXPOSE 8080
 CMD ["air", "-c", ".air.toml"]
 
 # Runtime image
-FROM alpine:3.20 AS runtime
+FROM alpine:3.22 AS runtime
 RUN addgroup -S app && adduser -S app -G app
 WORKDIR /app
 RUN mkdir -p /app/data/providers && chown -R app:app /app/data
