@@ -63,30 +63,13 @@ fmt: ## Format code
 deps: ## Download dependencies
 	go mod download
 	go mod tidy
-	@$(MAKE) fix-go-version
 
 swagger: ## Generate Swagger docs (requires swag)
 	swag init -g cmd/api/main.go -o docs
 
-check-go-version: ## Check if go.mod has correct Go version (1.22)
-	@if grep -q "^go 1.24" go.mod; then \
-		echo "❌ ERROR: go.mod has Go 1.24.0 which is not released yet!"; \
-		echo ""; \
-		echo "Dockerfile uses golang:1.22-alpine"; \
-		echo "Please change go.mod to: go 1.22"; \
-		echo ""; \
-		echo "Run: make fix-go-version"; \
-		exit 1; \
-	else \
-		echo "✅ go.mod Go version is correct (1.22)"; \
-	fi
-
-fix-go-version: ## Fix go.mod to use Go 1.22
-	@echo "Fixing go.mod to use Go 1.22..."
-	@go mod edit -go=1.22
-	@echo "✅ Fixed! go.mod now uses Go 1.22"
-	@echo ""
-	@grep "^go " go.mod
+check-go-version: ## Display go.mod Go version
+	@echo "go.mod Go version: $$(grep '^go ' go.mod)"
+	@echo "Dockerfile Go version: $$(grep 'FROM golang' Dockerfile | head -1)"
 
 .DEFAULT_GOAL := help
 
