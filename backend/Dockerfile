@@ -1,5 +1,5 @@
 # Base with dependencies cached
-FROM golang:1.23-alpine AS base
+FROM golang:1.25-alpine AS base
 WORKDIR /app
 ENV GOTOOLCHAIN=auto
 RUN apk add --no-cache git ca-certificates build-base
