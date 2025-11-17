@@ -3,7 +3,7 @@
 // See backend/GO_VERSION.md for details
 module search_engine
 
-go 1.22
+go 1.24.0
 
 require (
 	github.com/gin-contrib/cors v1.6.0

@@ -42,6 +42,9 @@ func (r *contentRepository) GetByID(ctx context.Context, id int64) (*entities.Co
 		&c.ID, &c.ProviderID, &c.ProviderContentID, &c.Title, &c.ContentType, &c.Description, &c.URL, &c.ThumbnailURL, &c.PublishedAt, &c.CreatedAt, &c.UpdatedAt,
 	)
 	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, nil // Content not found
+		}
 		return nil, err
 	}
 	return &c, nil
@@ -230,6 +233,9 @@ func (r *contentRepository) GetByProviderKey(ctx context.Context, providerID, pr
 	if err := r.pool.QueryRow(ctx, q, providerID, providerContentID).Scan(
 		&c.ID, &c.ProviderID, &c.ProviderContentID, &c.Title, &c.ContentType, &c.Description, &c.URL, &c.ThumbnailURL, &c.PublishedAt, &c.CreatedAt, &c.UpdatedAt,
 	); err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, nil // Content not found
+		}
 		return nil, err
 	}
 	return &c, nil
@@ -357,6 +363,9 @@ func (r *contentRepository) GetDetailByID(ctx context.Context, id int64) (*repos
 		&c.ID, &c.ProviderID, &c.ProviderContentID, &c.Title, &c.ContentType, &c.Description, &c.URL, &c.ThumbnailURL, &c.PublishedAt, &c.CreatedAt, &c.UpdatedAt,
 		&m.ID, &m.ContentID, &m.Views, &m.Likes, &m.ReadingTime, &m.Reactions, &m.FinalScore, &m.RecalculatedAt, &m.CreatedAt, &m.UpdatedAt,
 	); err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, nil // Content not found
+		}
 		return nil, err
 	}
 	res := repositories.ContentWithMetrics{Content: c, Metrics: m}
