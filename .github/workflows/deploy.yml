@@ -119,12 +119,11 @@ jobs:
           curl -f ${{ secrets.DEPLOY_URL }}/api/health || exit 1
       
       - name: Notify deployment
-        if: always()
+        if: always() && secrets.SLACK_WEBHOOK != ''
         uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
           text: 'Deployment ${{ job.status }} for ${{ github.repository }}'
-          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
 

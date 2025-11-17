@@ -157,6 +157,7 @@ jobs:
     
     steps:
       - name: Send notification
+        if: secrets.SLACK_WEBHOOK != ''
         uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
@@ -164,6 +165,5 @@ jobs:
             🎉 New release published: ${{ github.ref_name }}
             
             📦 View release: https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}
-          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
