@@ -42,74 +42,197 @@ Final Skor = (Temel Puan × İçerik Türü Katsayısı) + Güncellik Puanı + E
 
 ---
 
-## Hızlı Başlangıç (Geliştirme)
-Önkoşullar: Docker ve Docker Compose
+## 🚀 Kurulum ve Çalıştırma
 
-**⚠️ ÖNEMLİ: Go Version Kontrolü**
+### Gereksinimler
+
+**Zorunlu:**
+- **Docker** (v20.10+) ve **Docker Compose** (v2.0+)
+- **Git**
+
+**Opsiyonel (Geliştirme için):**
+- **Go** 1.24+ (local development için)
+- **Node.js** 20+ (frontend geliştirme için)
+- **Make** (komut kısayolları için)
+
+### 1️⃣ Projeyi İndirin
+
 ```bash
-# Git hooks'u yükleyin (önerilir - Go version hatalarını önler)
-make install-hooks
-
-# Veya manuel kontrol
-make check-go-version
-
-# Eğer Go version yanlışsa düzeltin
-make fix-go-version
+git clone <repository-url>
+cd search_engine
 ```
 
-1) Ortam değişkenlerini oluşturun:
-```
+### 2️⃣ Ortam Değişkenlerini Ayarlayın
+
+```bash
+# Backend .env dosyasını oluşturun
 cp backend/env.example backend/.env
+
+# Varsayılan ayarlar çoğu durumda yeterlidir
+# Gerekirse düzenleyin:
+# - API_PORT=8080
+# - ADMIN_API_KEY=your-secret-key
+# - DATABASE_URL, REDIS_URL, vb.
 ```
 
-2) Servisleri başlatın:
-```
-make up
-```
+### 3️⃣ Servisleri Başlatın
 
-3) (İlk kurulum) Veritabanı migration:
-```
-make migrate
-```
-
-4) Erişim adresleri:
-- API: `http://localhost:8080`
-- Swagger UI: `http://localhost:8080/swagger/index.html`
-- Frontend (Vite dev): `http://localhost:5173`
-
-Yardımcı komutlar:
-```
-make logs             # Tüm servis logları
-make api-logs         # API logları
-make fe-logs          # Frontend logları
-make down             # Servisleri durdur
-make seed             # Örnek verilerle doldur
-make check-go-version # Go version kontrolü
-make fix-go-version   # Go version'ı 1.22'ye düzelt
-make install-hooks    # Git hooks'u yükle
-```
-
-### Test Çalıştırma
-Backend test'leri:
 ```bash
-# Unit test'ler
+# Docker Compose ile tüm servisleri başlat
+make up
+
+# Alternatif (Make yoksa):
+docker compose up -d
+```
+
+Bu komut şunları başlatır:
+- ✅ PostgreSQL (port 5432)
+- ✅ Redis (port 6379)
+- ✅ Backend API (port 8080)
+- ✅ Frontend (port 5173)
+
+### 4️⃣ Veritabanı Migration (İlk Kurulumda)
+
+```bash
+# Migration'ları çalıştır
+make migrate
+
+# Alternatif:
+docker compose run --rm migrate up
+
+# (Opsiyonel) Örnek verilerle doldur
+make seed
+```
+
+### 5️⃣ Erişim ve Kullanım
+
+- 🌐 **API**: http://localhost:8080
+- 📚 **Swagger UI**: http://localhost:8080/swagger/index.html
+- 🎨 **Frontend Dashboard**: http://localhost:5173
+- 💚 **Health Check**: http://localhost:8080/health
+
+### 🛠️ Yaygın Komutlar
+
+```bash
+# Servisleri görüntüle
+make logs              # Tüm servis logları
+make api-logs          # Sadece API logları
+make fe-logs           # Sadece Frontend logları
+
+# Servisleri yönet
+make down              # Servisleri durdur
+make restart           # Yeniden başlat
+make ps                # Çalışan container'ları listele
+
+# Temizlik
+make clean             # Build artifacts temizle
+make clean-all         # Tüm volumes dahil temizle
+
+# Veritabanı
+make migrate           # Migration'ları çalıştır
+make migrate-down      # Migration'ları geri al
+make seed              # Örnek veri yükle
+
+# Geliştirme
+make check-go-version  # Go version kontrol
+make install-hooks     # Git hooks yükle
+```
+
+---
+
+## 🧪 Test Çalıştırma
+
+### Backend Testleri
+
+```bash
+# Unit testler (hızlı)
+cd backend
 make test-unit
 
-# Integration test'ler (Docker gerekli)
+# Integration testler (Docker gerekli)
 make test-integration
 
-# Tüm test'ler
+# Tüm testler
 make test
 
 # Test coverage raporu
 make test-coverage
-
-# Test environment kontrolü
-make test-env-up    # Test DB + Redis başlat
-make test-env-down  # Test environment durdur
+# Sonuç: coverage.html dosyası oluşur
 ```
 
-ENV ve servis konfigürasyonu: `backend/env.example`
+### Frontend Testleri
+
+```bash
+cd frontend
+npm test
+```
+
+### Docker Test Environment
+
+```bash
+# Test için ayrı DB + Redis başlat
+cd backend
+make test-env-up
+
+# Testleri çalıştır
+make test-integration
+
+# Test environment'ı durdur
+make test-env-down
+```
+
+---
+
+## 💻 Local Development (Docker Olmadan)
+
+### Backend
+
+```bash
+cd backend
+
+# Dependencies
+go mod download
+
+# PostgreSQL ve Redis gerekli (Docker ile):
+docker compose up -d postgres redis
+
+# Migration
+make migrate
+
+# API'yi local çalıştır
+go run ./cmd/api
+
+# Veya build edip çalıştır
+make build
+./bin/api
+```
+
+### Frontend
+
+```bash
+cd frontend
+
+# Dependencies
+npm install
+
+# Development server
+npm run dev
+
+# Build
+npm run build
+```
+
+### Swagger Docs Güncelleme
+
+```bash
+cd backend
+
+# Swagger docs'u yeniden oluştur
+make swagger
+
+# swag CLI gerekli (yüklü değilse):
+go install github.com/swaggo/swag/cmd/swag@latest
+```
 
 ---
 
@@ -238,10 +361,113 @@ docker compose -f backend/docker-compose.production.yml up -d
 
 ---
 
-## Sorun Giderme
-- Port çakışmaları için: `.env` içindeki `API_PORT` değiştirilebilir.
-- Frontend API tabanı: `VITE_API_BASE_URL` docker-compose ile `http://localhost:8080/api/v1`
-- Migration/container sırası için: `make up` sonrası `make migrate` komutunu çalıştırın.
+## 🔧 Sorun Giderme
+
+### Port Çakışması
+
+```bash
+# .env dosyasında portları değiştirin
+API_PORT=8081           # Backend
+POSTGRES_PORT=5433      # PostgreSQL
+REDIS_PORT=6380         # Redis
+
+# Frontend için (frontend/.env)
+VITE_API_PORT=8081
+```
+
+### Docker Container'lar Başlamıyor
+
+```bash
+# Mevcut container'ları temizle
+make down
+docker system prune -f
+
+# Yeniden başlat
+make up
+```
+
+### Migration Hataları
+
+```bash
+# Migration durumunu kontrol et
+docker compose run --rm migrate version
+
+# Migration'ları sıfırla (DİKKAT: Veri kaybı!)
+make migrate-down
+make migrate
+
+# Manuel migration (PostgreSQL container'ı içinde)
+docker compose exec postgres psql -U postgres -d searchdb
+```
+
+### API Erişim Sorunları
+
+```bash
+# Health check
+curl http://localhost:8080/health
+
+# Container loglarını kontrol et
+make api-logs
+
+# Database bağlantısını test et
+docker compose exec postgres psql -U postgres -d searchdb -c "SELECT 1;"
+```
+
+### Go Version Sorunları
+
+```bash
+# Go version kontrol
+cd backend
+make check-go-version
+
+# go.mod'da Go 1.24 olmalı
+grep "^go " go.mod
+# Çıktı: go 1.24.0
+
+# Eğer farklıysa dependencies'i yenileyin
+go mod tidy
+```
+
+### Frontend Build/Dev Sorunları
+
+```bash
+cd frontend
+
+# node_modules temizle ve yeniden yükle
+rm -rf node_modules package-lock.json
+npm install
+
+# Cache temizle
+npm cache clean --force
+
+# Dev server'ı yeniden başlat
+npm run dev
+```
+
+### Test Container'ları Temizleme
+
+```bash
+# Eski test container'larını temizle
+docker ps -a | grep testcontainers | awk '{print $1}' | xargs docker rm -f
+
+# Test environment'ı temizle
+cd backend
+make test-env-down
+docker volume prune -f
+```
+
+### Veritabanı Bağlantı Sorunları
+
+```bash
+# PostgreSQL container'ının çalıştığını kontrol et
+docker compose ps postgres
+
+# PostgreSQL loglarını kontrol et
+docker compose logs postgres
+
+# Elle bağlantı test et
+docker compose exec postgres psql -U postgres -d searchdb -c "\dt"
+```
 
 ---
 
