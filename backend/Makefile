@@ -63,6 +63,7 @@ fmt: ## Format code
 deps: ## Download dependencies
 	go mod download
 	go mod tidy
+	@$(MAKE) fix-go-version
 
 swagger: ## Generate Swagger docs (requires swag)
 	swag init -g cmd/api/main.go -o docs
